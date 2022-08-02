@@ -45,4 +45,6 @@ public static class GitHelper
 
         return (false, 0, new List<string>());
     }
+    
+    public static string GetRefName(string branchName) => $"origin/{branchName}";
 }

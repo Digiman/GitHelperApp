@@ -1,5 +1,4 @@
 ﻿using Microsoft.TeamFoundation.SourceControl.WebApi;
-using Microsoft.TeamFoundation.Work.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
@@ -14,7 +13,6 @@ public class AzureDevOpsHelper
 {
     private readonly GitHttpClient _gitClient;
     private readonly AzureDevOpsConfig _config;
-    private readonly TfvcHttpClient _tfvcHttpClient;
     private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
     
     public AzureDevOpsHelper(AzureDevOpsConfig config)
@@ -28,7 +26,6 @@ public class AzureDevOpsHelper
         var connection = new VssConnection(new Uri(vstsCollectionUrl), creds); 
 
         _gitClient = connection.GetClient<GitHttpClient>();
-        _tfvcHttpClient = connection.GetClient<TfvcHttpClient>();
         _workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
     }
 
@@ -91,74 +88,31 @@ public class AzureDevOpsHelper
         return result;
     }
 
-    public async Task<List<GitCommitRef>> GetCommitsDetailsAsync(GitRepository repository, string source,
-        string destination, List<string> commits)
+    public async Task<List<GitCommitRef>> GetCommitsDetailsAsync(GitRepository repository, List<string> commits,
+        string source, string destination)
     {
-        // var result = await _gitClient.GetCommitDiffsAsync(repositoryId: repository.Id,
-        //     diffCommonCommit: false,
-        //     baseVersionDescriptor: new GitBaseVersionDescriptor
-        //     {
-        //         Version = source
-        //     },
-        //     targetVersionDescriptor: new GitTargetVersionDescriptor
-        //     {
-        //         Version = destination
-        //     });
-        // var actualCommits = await _gitClient.GetCommitsBatchAsync(new GitQueryCommitsCriteria
-        // {
-        //     Ids = result.Changes.Select(x => x.Item).Distinct().Select(x=>x.CommitId).Distinct().ToList(),
-        //     IncludeLinks = true,
-        //
-        // }, repository.Id);
-        // return actualCommits;
-        
-        // var actualCommits = await _gitClient.GetCommitsBatchAsync(new GitQueryCommitsCriteria
-        // {
-        //     Ids = commits,
-        //     IncludeWorkItems = true,
-        //     IncludeLinks = true,
-        //     IncludePushData = true
-        // }, repository.Id);
-
         var actualCommits = await _gitClient.GetCommitsBatchAsync(new GitQueryCommitsCriteria
         {
+            CompareVersion = new GitVersionDescriptor { Version = source },
+            ItemVersion = new GitVersionDescriptor { Version = destination },
             IncludeWorkItems = true,
-            HistoryMode = GitHistoryMode.SimplifiedHistory,
-            IncludeLinks = true,
-            IncludePushData = true,
-            FromCommitId = commits.First(),
-            ToCommitId = commits.Last()
+            Top = 100
         }, repository.Id);
         
-        // var actualCommits3 = await _gitClient.GetCommitsBatchAsync(new GitQueryCommitsCriteria
+        // var actualCommits = await _gitClient.GetCommitsBatchAsync(new GitQueryCommitsCriteria
         // {
         //     IncludeWorkItems = true,
         //     HistoryMode = GitHistoryMode.FullHistory,
-        //     IncludeLinks = true,
-        //     IncludePushData = true,
         //     FromCommitId = commits.First(),
         //     ToCommitId = commits.Last()
-        //
         // }, repository.Id);
 
-        // var wit1 = actualCommits.SelectMany(x => x.WorkItems).Select(x => x.Id).Distinct();
-        // var wit2 = actualCommits3.SelectMany(x => x.WorkItems).Select(x => x.Id).Distinct();
-        
-        // var tmp = await _gitClient.GetCommitsAsync(repository.Id, new GitQueryCommitsCriteria
-        // {
-        //     Ids = commits,
-        //     IncludePushData = true,
-        //     IncludeWorkItems = true,
-        //     IncludeLinks = true
-        // });
-        
-        
         return actualCommits;
     }
 
     public async Task<List<WorkItem>> ProcessWorkItemsAsync(List<GitCommitRef> commits)
     {
-        var types = await _workItemTrackingHttpClient.GetWorkItemTypesAsync(_config.TeamProject);
+        // var types = await _workItemTrackingHttpClient.GetWorkItemTypesAsync(_config.TeamProject);
         
         var workItemIds  = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct();
         var wits = await _workItemTrackingHttpClient.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
@@ -177,5 +131,10 @@ public class AzureDevOpsHelper
     public string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId)
     {
         return $"{_config.CollectionUrl}/{teamProject}/_git/{repositoryName}/pullrequest/{pullRequestId}";
+    }
+    
+    public string BuildWorkItemUrl(string teamProject, string workItemId)
+    {
+        return $"{_config.CollectionUrl}/{teamProject}/_workitems/edit/{workItemId}";
     }
 }

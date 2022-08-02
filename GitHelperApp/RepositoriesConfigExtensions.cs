@@ -40,24 +40,24 @@ public static class RepositoryConfigExtensions
 
 public static class WorkItemExtensions
 {
-    public static WorkItemModel ToModel(this WorkItem workItem)
+    public static WorkItemModel ToModel(this WorkItem workItem, string url)
     {
         return new WorkItemModel
         {
             Id = workItem.Id.ToString(),
-            Url = workItem.Url
+            Url = url
         };
     }
 }
 
 public static class ResourceRefExtensions
 {
-    public static WorkItemModel ToModel(this ResourceRef resourceRef)
+    public static WorkItemModel ToModel(this ResourceRef resourceRef, string url)
     {
         return new WorkItemModel
         {
             Id = resourceRef.Id,
-            Url = resourceRef.Url
+            Url = url
         };
     }
 }

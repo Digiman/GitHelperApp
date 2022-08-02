@@ -4,25 +4,34 @@ namespace GitHelperApp;
 
 public static class AppHelper
 {
-    public static List<CompareResult> DoCompare(RepositoriesConfig reposConfig, bool isPrintToConsole = true, bool isPrintToFile = false)
+    /// <summary>
+    /// Main logic to identify the changes in repositories (do it locally by ue remote branches).
+    /// </summary>
+    /// <param name="repositoriesConfig">Repositories config.</param>
+    /// <returns>Returns compare result.</returns>
+    public static List<CompareResult> DoCompare(RepositoriesConfig repositoriesConfig)
     {
-        var compareResults = CompareBranches(reposConfig);
+        var compareResults = CompareBranches(repositoriesConfig);
+        
+        return compareResults;
+    }
 
-        var lines = ProcessCompareResults(reposConfig, compareResults);
+    public static void OutputCompareResults(RepositoriesConfig repositoriesConfig, List<CompareResult> compareResults,
+        string id, bool isPrintToConsole = true, bool isPrintToFile = false)
+    {
+        var lines = ProcessCompareResults(repositoriesConfig, compareResults);
 
         if (isPrintToConsole)
         {
-            OutputResultToConsole(lines);
+            OutputHelper.OutputResultToConsole(lines);
         }
 
         if (isPrintToFile)
         {
-            OutputResultToFile(lines, $"C:\\Temp\\Result-{Guid.NewGuid().ToString("N")}.txt");
+            OutputHelper.OutputResultToFile(lines, FileNameHelper.CreateFilenameForCompareResults(id));
         }
-
-        return compareResults;
     }
-
+    
     #region Main logic for the applicaion.
 
     private static List<CompareResult> CompareBranches(RepositoriesConfig repositoriesConfig)
@@ -42,7 +51,7 @@ public static class AppHelper
                 ? repositoryConfig.DestinationBranch
                 : repositoriesConfig.DefaultDestinationBranch;
             
-            var (isChanges, count, commits) = GitHelper.CompareBranches(repositoryConfig.Path, GetRefName(source), GetRefName(destination));
+            var (isChanges, count, commits) = GitHelper.CompareBranches(repositoryConfig.Path, GitHelper.GetRefName(source), GitHelper.GetRefName(destination));
 
             result.Add(new CompareResult
             {
@@ -56,8 +65,6 @@ public static class AppHelper
 
         return result;
     }
-
-    public static string GetRefName(string branchName) => $"origin/{branchName}";
 
     private static List<string> ProcessCompareResults(RepositoriesConfig repositoriesConfig,
         IReadOnlyCollection<CompareResult> results)
@@ -94,102 +101,88 @@ public static class AppHelper
 
         return lines;
     }
-
-    private static void OutputResultToConsole(IReadOnlyCollection<string> lines)
-    {
-        foreach (var line in lines)
-        {
-            Console.WriteLine(line);
-        }
-    }
-
-    private static void OutputResultToFile(IReadOnlyCollection<string> lines, string filename)
-    {
-        File.WriteAllLines(filename, lines);
-    }
     
     #endregion
     
-    public static void OutputRepositoriesList(RepositoriesConfig repositoriesConfig)
-    {
-        var index = 1;
-        foreach (var repo in repositoriesConfig.Repositories.OrderBy(x=>x.Name))
-        {
-            Console.WriteLine($"{index}: {repo.Name}");
-            index++;
-        }
-    }
-    
     #region Azure DevOps stuff.
 
-    public static async Task TestAzureAsync(List<CompareResult> results, AzureDevOpsConfig azureConfig)
-    {
-        var helper = new AzureDevOpsHelper(azureConfig);
+    // public static async Task TestAzureAsync(List<CompareResult> results, AzureDevOpsConfig azureConfig)
+    // {
+    //     var helper = new AzureDevOpsHelper(azureConfig);
+    //
+    //     await helper.GetRepositoriesAsync(azureConfig.TeamProject);
+    //
+    //     var repo = await helper.GetRepositoryByNameAsync("ratings");
+    //     var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
+    //
+    //     var builder = new GitPullRequestBuilder("Sprint 8 Draft Release Automated", "Automated PR from the tool",
+    //         "dev", "release");
+    //
+    //     var pr = builder.WithAuthor("Andrey Kukharenko").AsDraft().Build();
+    //     var prCreated = await helper.CreatePullRequestAsync(pr, repo);
+    //
+    //     Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}");
+    //
+    //     // foreach (var compareResult in results)
+    //     // {
+    //     //     var repo = await helper.GetRepositoryByNameAsync(compareResult.RepositoryName);
+    //     //     if (repo != null)
+    //     //     {
+    //     //         var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
+    //     //         Console.WriteLine($"Exists - Name: {repo.Name} Id: {repo.Id}");
+    //     //     }
+    //     //     else
+    //     //     {
+    //     //         Console.WriteLine($"Not found - Name: {compareResult.RepositoryName}");
+    //     //         
+    //     //         var repo2 = await helper.GetRepositoryByNameAsync(compareResult.RepositoryName, "Videa Git");
+    //     //         Console.WriteLine($"Exists - Name: {repo2.Name} Id: {repo2.Id}");
+    //     //     }
+    //     // }
+    // }
+    //
+    // public static async Task TestAzureAsync2(List<CompareResult> results, AzureDevOpsConfig azureConfig)
+    // {
+    //     var helper = new AzureDevOpsHelper(azureConfig);
+    //
+    //     await helper.GetRepositoriesAsync(azureConfig.TeamProject);
+    //
+    //     var repo = await helper.GetRepositoryByNameAsync("ratings");
+    //     var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
+    //
+    //     var actualPr = AppHelper.SearchForPrCreated(prs, "Sprint 8 Draft Release Automated", "dev", "release");
+    //     if (actualPr == null)
+    //     {
+    //         var builder = new GitPullRequestBuilder("Sprint 8 Draft Release Automated",
+    //             "Automated PR from the tool", "dev", "release");
+    //         var pr = builder.WithAuthor("Andrey Kukharenko").AsDraft().Build();
+    //         var prCreated = await helper.CreatePullRequestAsync(pr, repo);
+    //
+    //         Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}. Url: {prCreated.Url}");
+    //     }
+    //     else
+    //     {
+    //         Console.WriteLine($"PR already with Id {actualPr.PullRequestId}. Url: {actualPr.Url}");
+    //     }
+    // }
 
-        await helper.GetRepositoriesAsync(azureConfig.TeamProject);
-
-        var repo = await helper.GetRepositoryByNameAsync("ratings");
-        var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
-
-        var builder = new GitPullRequestBuilder("Sprint 8 Draft Release Automated", "Automated PR from the tool",
-            "dev", "release");
-
-        var pr = builder.WithAuthorAndrey().AsDraft().Build();
-        var prCreated = await helper.CreatePullRequestAsync(pr, repo);
-
-        Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}");
-
-        // foreach (var compareResult in results)
-        // {
-        //     var repo = await helper.GetRepositoryByNameAsync(compareResult.RepositoryName);
-        //     if (repo != null)
-        //     {
-        //         var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
-        //         Console.WriteLine($"Exists - Name: {repo.Name} Id: {repo.Id}");
-        //     }
-        //     else
-        //     {
-        //         Console.WriteLine($"Not found - Name: {compareResult.RepositoryName}");
-        //         
-        //         var repo2 = await helper.GetRepositoryByNameAsync(compareResult.RepositoryName, "Videa Git");
-        //         Console.WriteLine($"Exists - Name: {repo2.Name} Id: {repo2.Id}");
-        //     }
-        // }
-    }
-
-    public static async Task TestAzureAsync2(List<CompareResult> results, AzureDevOpsConfig azureConfig)
-    {
-        var helper = new AzureDevOpsHelper(azureConfig);
-
-        await helper.GetRepositoriesAsync(azureConfig.TeamProject);
-
-        var repo = await helper.GetRepositoryByNameAsync("ratings");
-        var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
-
-        var actualPr = AppHelper.SearchForPrCreated(prs, "Sprint 8 Draft Release Automated", "dev", "release");
-        if (actualPr == null)
-        {
-            var builder = new GitPullRequestBuilder("Sprint 8 Draft Release Automated",
-                "Automated PR from the tool", "dev", "release");
-            var pr = builder.WithAuthorAndrey().AsDraft().WithAuthorAndrey().Build();
-            var prCreated = await helper.CreatePullRequestAsync(pr, repo);
-
-            Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}. Url: {prCreated.Url}");
-        }
-        else
-        {
-            Console.WriteLine($"PR already with Id {actualPr.PullRequestId}. Url: {actualPr.Url}");
-        }
-    }
-
+    /// <summary>
+    /// Create the PR for all repositories with changes exists.
+    /// </summary>
+    /// <param name="repositoriesConfig">Repositories config.</param>
+    /// <param name="compareResults">Compare results from the first step.</param>
+    /// <param name="azureConfig">Azure configuration settings.</param>
+    /// <param name="pullRequestModel">Model with information for PR to be created.</param>
+    /// <returns>Returns the PR result with details on each PR created/existed.</returns>
     public static async Task<List<PullRequestResult>> CreatePullRequestsAsync(RepositoriesConfig repositoriesConfig,
-        List<CompareResult> results, AzureDevOpsConfig azureConfig, PullRequestModel pullRequestModel)
+        List<CompareResult> compareResults, AzureDevOpsConfig azureConfig, PullRequestModel pullRequestModel)
     {
         var result = new List<PullRequestResult>();
 
         var helper = new AzureDevOpsHelper(azureConfig);
 
-        foreach (var compareResult in results.Where(x => x.RepositoryName == "featureflag-service"))
+        // foreach (var compareResult in compareResults.Where(x => x.RepositoryName == "featureflag-service"))
+        foreach (var compareResult in compareResults.Where(x => x.ChangesCount > 0))
         {
             var repoInfo = repositoriesConfig.GetRepositoryConfig(compareResult.RepositoryName);
             
@@ -201,7 +194,7 @@ public static class AppHelper
         return result;
     }
 
-    public static async Task<PullRequestResult> CreatePullRequestAsync(AzureDevOpsHelper helper, string repositoryName,
+    private static async Task<PullRequestResult> CreatePullRequestAsync(AzureDevOpsHelper helper, string repositoryName,
         string teamProject, string sourceBranch, string destinationBranch, List<string> commits,
         PullRequestModel pullRequestModel)
     {
@@ -213,7 +206,7 @@ public static class AppHelper
         var actualPr = SearchForPrCreated(prs, prTitle, sourceBranch, destinationBranch);
         if (actualPr == null)
         {
-            var gitCommits = await helper.GetCommitsDetailsAsync(repo, sourceBranch, destinationBranch, commits);
+            var gitCommits = await helper.GetCommitsDetailsAsync(repo, commits, sourceBranch, destinationBranch);
 
             var workItems = await helper.ProcessWorkItemsAsync(gitCommits);
 
@@ -224,29 +217,29 @@ public static class AppHelper
                 .WthDefaultReviewers()
                 .AsDraft()
                 .Build();
-            var prCreated = await helper.CreatePullRequestAsync(pr, repo);
+            // var prCreated = await helper.CreatePullRequestAsync(pr, repo);
 
-            Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}. Url: {prCreated.Url}. Work items count: {workItems.Count}.");
+            // Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}. Url: {prCreated.Url}. Work items count: {workItems.Count}.");
 
             return new PullRequestResult
             {
-                PullRequestId = prCreated.PullRequestId,
+                // PullRequestId = prCreated.PullRequestId,
                 RepositoryName = repositoryName,
-                Url = helper.BuildPullRequestUrl(teamProject, repositoryName, prCreated.PullRequestId),
-                WorkItems = workItems.Select(x => x.ToModel()).ToList()
+                // Url = helper.BuildPullRequestUrl(teamProject, repositoryName, prCreated.PullRequestId),
+                WorkItems = workItems.Select(x => x.ToModel(helper.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList()
             };
         }
 
         var workItemsForActualPr = await helper.GetPullRequestDetailsAsync(repo, actualPr.PullRequestId);
 
-        Console.WriteLine($"PR already with Id {actualPr.PullRequestId}. Url: {actualPr.Url}. Work items count: {workItemsForActualPr.Count}.");
+        Console.WriteLine($"PR already created with Id {actualPr.PullRequestId}. Url: {actualPr.Url}. Work items count: {workItemsForActualPr.Count}.");
 
         return new PullRequestResult
         {
             PullRequestId = actualPr.PullRequestId,
             RepositoryName = repositoryName,
             Url = helper.BuildPullRequestUrl(teamProject, repositoryName, actualPr.PullRequestId),
-            WorkItems = workItemsForActualPr.Select(x => x.ToModel()).ToList()
+            WorkItems = workItemsForActualPr.Select(x => x.ToModel(helper.BuildWorkItemUrl(teamProject, x.Id))).ToList()
         };
     }
 
@@ -258,4 +251,48 @@ public static class AppHelper
     }
     
     #endregion
+    
+    public static void ProcessFullResult(RepositoriesConfig repositoriesConfig, List<CompareResult> compareResults,
+        List<PullRequestResult> prResults, string id, bool isPrintToConsole = false,
+        bool isPrintToFile = false)
+    {
+        // 1. Process compare result.
+        var lines = ProcessCompareResults(repositoriesConfig, compareResults);
+
+        // 2. Process PR result.
+        lines.AddRange(ProcessPrResults(prResults));
+        
+        if (isPrintToConsole)
+        {
+            OutputHelper.OutputResultToConsole(lines);
+        }
+
+        if (isPrintToFile)
+        {
+            OutputHelper.OutputResultToFile(lines, FileNameHelper.CreateFilenameForFullResults(id));
+
+            var prIds = prResults.Select(x => x.PullRequestId.ToString()).ToList();
+            OutputHelper.OutputResultToFile(prIds, FileNameHelper.CreateFileNameForPrIds(id));
+        }
+    }
+
+    private static IEnumerable<string> ProcessPrResults(List<PullRequestResult> prResults)
+    {
+        var lines = new List<string>();
+
+        var index = 1;
+        foreach (var pullRequestResult in prResults)
+        {
+            lines.Add($"{index}: {pullRequestResult.RepositoryName}:");
+            lines.Add($"PR was created with Id {pullRequestResult.PullRequestId}. Url: {pullRequestResult.Url}. Work items count: {pullRequestResult.WorkItems.Count}.");
+            lines.Add("Work items:");
+            lines.AddRange(pullRequestResult.WorkItems.Select(workItemModel => $"Work Item Id: {workItemModel.Id}. Url: {workItemModel.Url}"));
+
+            lines.Add(Environment.NewLine);
+
+            index++;
+        }
+
+        return lines;
+    }
 }

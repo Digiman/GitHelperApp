@@ -19,19 +19,6 @@ public sealed class GitPullRequestBuilder
             SourceRefName = GetRefName(sourceBranch)
         };
     }
-
-    public GitPullRequestBuilder WithAuthorAndrey()
-    {
-        _pullRequest.CreatedBy = new IdentityRef
-        {
-            Id = "b9f8187f-14e4-486b-95ab-a063c9c26d51",
-            DisplayName = "Andrey Kukharenko",
-            UniqueName = @"GatewayDevOpsDa\akukharenko"
-        };
-        
-        return this;
-    }
-
     
     public GitPullRequestBuilder WithAuthor(string userName)
     {
@@ -50,23 +37,36 @@ public sealed class GitPullRequestBuilder
 
     public GitPullRequestBuilder WthDefaultReviewers()
     {
-        _pullRequest.Reviewers = new[]
+        var userNames = new[]
         {
-            new IdentityRefWithVote
-            {
-                Id = "a6cc9965-0b11-4c04-980a-055c98314119" // Admiral
-            }
+            "Admiral", "Haygood, Justin", "Brian Bober", // Matrix team
+            "Ivan Grishkov", "Oleg Solonko", "Konstantin Bondarenko", "Stas Ivanousky" // Oxagile team
         };
+        _pullRequest.Reviewers = userNames.Select(x => new IdentityRefWithVote
+        {
+            Id = Constants.Users[x]
+        }).ToArray();
         
         return this;
     }
     
-    public GitPullRequestBuilder WthReviewers(List<string> userName)
+    public GitPullRequestBuilder WthDefaultReviewersForMain()
     {
-        _pullRequest.Reviewers = (IdentityRefWithVote[])userName.Select(x => new IdentityRefWithVote
+        var userNames = new[] { "Admiral", "Haygood, Justin", "Brian Bober" };
+        _pullRequest.Reviewers = userNames.Select(x => new IdentityRefWithVote
         {
             Id = Constants.Users[x]
-        });
+        }).ToArray();
+        
+        return this;
+    }
+    
+    public GitPullRequestBuilder WthReviewers(List<string> userNames)
+    {
+        _pullRequest.Reviewers = userNames.Select(x => new IdentityRefWithVote
+        {
+            Id = Constants.Users[x]
+        }).ToArray();
         
         return this;
     }
