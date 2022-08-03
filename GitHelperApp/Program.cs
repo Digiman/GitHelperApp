@@ -2,7 +2,6 @@
 
 using GitHelperApp;
 using Microsoft.Extensions.Configuration;
-using Microsoft.TeamFoundation.SourceControl.WebApi;
 
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
@@ -30,7 +29,8 @@ var azureConfig = config.GetSection("AzureDevOps").Get<AzureDevOpsConfig>();
 var prModel = new PullRequestModel
 {
     Title = "Sprint 8 Draft Release Automated",
-    Description = "Automated PR from the tool"
+    Description = "Automated PR from the tool",
+    IsDraft = true
 };
 
 var prResults = await AppHelper.CreatePullRequestsAsync(reposConfig, compareResults, azureConfig, prModel);
@@ -39,8 +39,6 @@ Console.WriteLine($"PR processed: {prResults.Count}");
 
 // process the full result and print to file and console
 AppHelper.ProcessFullResult(reposConfig, compareResults, prResults, runId, true, true);
-
-// need to somehow to merge the results and generate final file with results
 
 // ----------------------------------------------------------------
 

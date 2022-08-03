@@ -1,4 +1,5 @@
 ﻿using Microsoft.TeamFoundation.SourceControl.WebApi;
+using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 namespace GitHelperApp;
 
@@ -105,67 +106,7 @@ public static class AppHelper
     #endregion
     
     #region Azure DevOps stuff.
-
-    // public static async Task TestAzureAsync(List<CompareResult> results, AzureDevOpsConfig azureConfig)
-    // {
-    //     var helper = new AzureDevOpsHelper(azureConfig);
-    //
-    //     await helper.GetRepositoriesAsync(azureConfig.TeamProject);
-    //
-    //     var repo = await helper.GetRepositoryByNameAsync("ratings");
-    //     var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
-    //
-    //     var builder = new GitPullRequestBuilder("Sprint 8 Draft Release Automated", "Automated PR from the tool",
-    //         "dev", "release");
-    //
-    //     var pr = builder.WithAuthor("Andrey Kukharenko").AsDraft().Build();
-    //     var prCreated = await helper.CreatePullRequestAsync(pr, repo);
-    //
-    //     Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}");
-    //
-    //     // foreach (var compareResult in results)
-    //     // {
-    //     //     var repo = await helper.GetRepositoryByNameAsync(compareResult.RepositoryName);
-    //     //     if (repo != null)
-    //     //     {
-    //     //         var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
-    //     //         Console.WriteLine($"Exists - Name: {repo.Name} Id: {repo.Id}");
-    //     //     }
-    //     //     else
-    //     //     {
-    //     //         Console.WriteLine($"Not found - Name: {compareResult.RepositoryName}");
-    //     //         
-    //     //         var repo2 = await helper.GetRepositoryByNameAsync(compareResult.RepositoryName, "Videa Git");
-    //     //         Console.WriteLine($"Exists - Name: {repo2.Name} Id: {repo2.Id}");
-    //     //     }
-    //     // }
-    // }
-    //
-    // public static async Task TestAzureAsync2(List<CompareResult> results, AzureDevOpsConfig azureConfig)
-    // {
-    //     var helper = new AzureDevOpsHelper(azureConfig);
-    //
-    //     await helper.GetRepositoriesAsync(azureConfig.TeamProject);
-    //
-    //     var repo = await helper.GetRepositoryByNameAsync("ratings");
-    //     var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
-    //
-    //     var actualPr = AppHelper.SearchForPrCreated(prs, "Sprint 8 Draft Release Automated", "dev", "release");
-    //     if (actualPr == null)
-    //     {
-    //         var builder = new GitPullRequestBuilder("Sprint 8 Draft Release Automated",
-    //             "Automated PR from the tool", "dev", "release");
-    //         var pr = builder.WithAuthor("Andrey Kukharenko").AsDraft().Build();
-    //         var prCreated = await helper.CreatePullRequestAsync(pr, repo);
-    //
-    //         Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}. Url: {prCreated.Url}");
-    //     }
-    //     else
-    //     {
-    //         Console.WriteLine($"PR already with Id {actualPr.PullRequestId}. Url: {actualPr.Url}");
-    //     }
-    // }
-
+    
     /// <summary>
     /// Create the PR for all repositories with changes exists.
     /// </summary>
@@ -187,7 +128,8 @@ public static class AppHelper
             var repoInfo = repositoriesConfig.GetRepositoryConfig(compareResult.RepositoryName);
             
             var prResult = await CreatePullRequestAsync(helper, compareResult.RepositoryName, repoInfo.TeamProject,
-                repoInfo.SourceBranch, repoInfo.DestinationBranch, compareResult.Commits, pullRequestModel);
+                repoInfo.SourceBranch, repoInfo.DestinationBranch, pullRequestModel);
+            
             result.Add(prResult);
         }
 
@@ -195,8 +137,7 @@ public static class AppHelper
     }
 
     private static async Task<PullRequestResult> CreatePullRequestAsync(AzureDevOpsHelper helper, string repositoryName,
-        string teamProject, string sourceBranch, string destinationBranch, List<string> commits,
-        PullRequestModel pullRequestModel)
+        string teamProject, string sourceBranch, string destinationBranch, PullRequestModel pullRequestModel)
     {
         var repo = await helper.GetRepositoryByNameAsync(repositoryName, teamProject);
         var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);
@@ -206,28 +147,41 @@ public static class AppHelper
         var actualPr = SearchForPrCreated(prs, prTitle, sourceBranch, destinationBranch);
         if (actualPr == null)
         {
-            var gitCommits = await helper.GetCommitsDetailsAsync(repo, commits, sourceBranch, destinationBranch);
+            var gitCommits = await helper.GetCommitsDetailsAsync(repo, sourceBranch, destinationBranch);
 
-            var workItems = await helper.ProcessWorkItemsAsync(gitCommits);
-
-            var builder = new GitPullRequestBuilder(prTitle, pullRequestModel.Description, sourceBranch, destinationBranch);
-            var pr = builder
-                .WithAuthor("Andrey Kukharenko")
-                .WithWorkItems(workItems)
-                .WthDefaultReviewers()
-                .AsDraft()
-                .Build();
-            // var prCreated = await helper.CreatePullRequestAsync(pr, repo);
-
-            // Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}. Url: {prCreated.Url}. Work items count: {workItems.Count}.");
-
-            return new PullRequestResult
+            if (gitCommits.Count == 0)
             {
-                // PullRequestId = prCreated.PullRequestId,
-                RepositoryName = repositoryName,
-                // Url = helper.BuildPullRequestUrl(teamProject, repositoryName, prCreated.PullRequestId),
-                WorkItems = workItems.Select(x => x.ToModel(helper.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList()
-            };
+                Console.WriteLine("Something goes wrong and no changes found for PR!");
+            }
+            else
+            {
+                var workItems = await helper.GetWorkItemsAsync(gitCommits);
+
+                workItems = ProcessWorkItems(workItems);
+
+                var builder = new GitPullRequestBuilder(prTitle, pullRequestModel.Description, sourceBranch, destinationBranch);
+                builder = builder
+                    .WithAuthor("Andrey Kukharenko")
+                    .WithWorkItems(workItems)
+                    .WthDefaultReviewers();
+                if (pullRequestModel.IsDraft)
+                {
+                    builder = builder.AsDraft();
+                }
+
+                var pr = builder.Build();
+                // var prCreated = await helper.CreatePullRequestAsync(pr, repo);
+
+                // Console.WriteLine($"PR was created with Id {prCreated.PullRequestId}. Url: {prCreated.Url}. Work items count: {workItems.Count}.");
+
+                return new PullRequestResult
+                {
+                    // PullRequestId = prCreated.PullRequestId,
+                    RepositoryName = repositoryName,
+                    // Url = helper.BuildPullRequestUrl(teamProject, repositoryName, prCreated.PullRequestId),
+                    WorkItems = workItems.Select(x => x.ToModel(helper.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList()
+                };
+            }
         }
 
         var workItemsForActualPr = await helper.GetPullRequestDetailsAsync(repo, actualPr.PullRequestId);
@@ -243,7 +197,23 @@ public static class AppHelper
         };
     }
 
-    public static GitPullRequest SearchForPrCreated(List<GitPullRequest> pullRequests, string title, string source, string destination)
+    private static List<WorkItem> ProcessWorkItems(List<WorkItem> workItems)
+    {
+        // we need to process here all the WI to exclude duplicates and etc.
+        var uniqueIds = workItems.Select(x => x.Id).Distinct().ToList();
+        var result = new List<WorkItem>(uniqueIds.Count);
+        if (uniqueIds.Count != workItems.Count)
+        {
+            foreach (var uniqueId in uniqueIds)
+            {
+                result.Add(workItems.FirstOrDefault(x => x.Id == uniqueId));
+            }
+        }
+
+        return workItems;
+    }
+
+    private static GitPullRequest SearchForPrCreated(List<GitPullRequest> pullRequests, string title, string source, string destination)
     {
         return pullRequests.FirstOrDefault(x =>
             x.Title == title && x.SourceRefName == GitPullRequestBuilder.GetRefName(source)
@@ -261,6 +231,11 @@ public static class AppHelper
 
         // 2. Process PR result.
         lines.AddRange(ProcessPrResults(prResults));
+
+        // output only PR IDs to separate file
+        ProcessPrsResult(prResults, id, isPrintToConsole, isPrintToFile);
+
+        ProcessWorkItemsResult(prResults, id, isPrintToConsole, isPrintToFile);
         
         if (isPrintToConsole)
         {
@@ -270,29 +245,88 @@ public static class AppHelper
         if (isPrintToFile)
         {
             OutputHelper.OutputResultToFile(lines, FileNameHelper.CreateFilenameForFullResults(id));
+        }
+    }
 
-            var prIds = prResults.Select(x => x.PullRequestId.ToString()).ToList();
-            OutputHelper.OutputResultToFile(prIds, FileNameHelper.CreateFileNameForPrIds(id));
+    private static void ProcessWorkItemsResult(List<PullRequestResult> prResults, string id, bool isPrintToConsole, bool isPrintToFile)
+    {
+        var lines = new List<string>();
+        
+        // process the list of Work Items to have unique list at the end of log file
+        var workItems = prResults.SelectMany(x => x.WorkItems).Distinct().ToList();
+        
+        var uniqueIds = workItems.Select(x => x.Id).Distinct().ToList();
+        var result = new List<WorkItemModel>(uniqueIds.Count);
+        if (uniqueIds.Count != workItems.Count)
+        {
+            foreach (var uniqueId in uniqueIds)
+            {
+                result.Add(workItems.FirstOrDefault(x => x.Id == uniqueId));
+            }
+        }
+        
+        lines.Add($"Work items summary ({workItems.Count}):");
+        lines.AddRange(result.Select(workItemModel => $"\tWork Item Id: {workItemModel.Id}. Url: {workItemModel.Url}"));
+
+        if (isPrintToConsole)
+        {
+            OutputHelper.OutputResultToConsole(lines);
+        }
+
+        if (isPrintToFile)
+        {
+            OutputHelper.OutputResultToFile(lines, FileNameHelper.CreateFileNameForWorkItems(id));
+        }
+    }
+
+    private static void ProcessPrsResult(List<PullRequestResult> prResults, string id, bool isPrintToConsole, bool isPrintToFile)
+    {
+        var lines = prResults.Select(x => x.PullRequestId.ToString()).ToList();
+        
+        if (isPrintToConsole)
+        {
+            OutputHelper.OutputResultToConsole(lines);
+        }
+
+        if (isPrintToFile)
+        {
+            OutputHelper.OutputResultToFile(lines, FileNameHelper.CreateFileNameForPrIds(id));
         }
     }
 
     private static IEnumerable<string> ProcessPrResults(List<PullRequestResult> prResults)
     {
         var lines = new List<string>();
-
+        
         var index = 1;
         foreach (var pullRequestResult in prResults)
         {
             lines.Add($"{index}: {pullRequestResult.RepositoryName}:");
             lines.Add($"PR was created with Id {pullRequestResult.PullRequestId}. Url: {pullRequestResult.Url}. Work items count: {pullRequestResult.WorkItems.Count}.");
             lines.Add("Work items:");
-            lines.AddRange(pullRequestResult.WorkItems.Select(workItemModel => $"Work Item Id: {workItemModel.Id}. Url: {workItemModel.Url}"));
+            lines.AddRange(pullRequestResult.WorkItems.Select(workItemModel => $"\tWork Item Id: {workItemModel.Id}. Url: {workItemModel.Url}"));
 
             lines.Add(Environment.NewLine);
-
             index++;
         }
-
+        
+        lines.Add(Environment.NewLine);
+        
+        // process the list of Work Items to have unique list at the end of log file
+        var workItems = prResults.SelectMany(x => x.WorkItems).Distinct().ToList();
+        
+        var uniqueIds = workItems.Select(x => x.Id).Distinct().ToList();
+        var result = new List<WorkItemModel>(uniqueIds.Count);
+        if (uniqueIds.Count != workItems.Count)
+        {
+            foreach (var uniqueId in uniqueIds)
+            {
+                result.Add(workItems.FirstOrDefault(x => x.Id == uniqueId));
+            }
+        }
+        lines.Add($"Work items summary ({result.Count}):");
+        lines.AddRange(result.Select(workItemModel => $"\tWork Item Id: {workItemModel.Id}. Url: {workItemModel.Url}"));
+        
         return lines;
     }
 }

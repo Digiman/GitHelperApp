@@ -88,9 +88,9 @@ public class AzureDevOpsHelper
         return result;
     }
 
-    public async Task<List<GitCommitRef>> GetCommitsDetailsAsync(GitRepository repository, List<string> commits,
-        string source, string destination)
+    public async Task<List<GitCommitRef>> GetCommitsDetailsAsync(GitRepository repository, string source, string destination)
     {
+        // compare branches and search for commits
         var actualCommits = await _gitClient.GetCommitsBatchAsync(new GitQueryCommitsCriteria
         {
             CompareVersion = new GitVersionDescriptor { Version = source },
@@ -98,22 +98,11 @@ public class AzureDevOpsHelper
             IncludeWorkItems = true,
             Top = 100
         }, repository.Id);
-        
-        // var actualCommits = await _gitClient.GetCommitsBatchAsync(new GitQueryCommitsCriteria
-        // {
-        //     IncludeWorkItems = true,
-        //     HistoryMode = GitHistoryMode.FullHistory,
-        //     FromCommitId = commits.First(),
-        //     ToCommitId = commits.Last()
-        // }, repository.Id);
-
         return actualCommits;
     }
 
-    public async Task<List<WorkItem>> ProcessWorkItemsAsync(List<GitCommitRef> commits)
+    public async Task<List<WorkItem>> GetWorkItemsAsync(List<GitCommitRef> commits)
     {
-        // var types = await _workItemTrackingHttpClient.GetWorkItemTypesAsync(_config.TeamProject);
-        
         var workItemIds  = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct();
         var wits = await _workItemTrackingHttpClient.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
         {
