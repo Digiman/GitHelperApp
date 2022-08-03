@@ -2,7 +2,7 @@
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.WebApi;
 
-namespace GitHelperApp;
+namespace GitHelperApp.Builders;
 
 public sealed class GitPullRequestBuilder
 {

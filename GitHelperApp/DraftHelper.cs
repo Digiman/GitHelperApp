@@ -1,4 +1,6 @@
-﻿namespace GitHelperApp;
+﻿using GitHelperApp.Configuration;
+
+namespace GitHelperApp;
 
 public static class DraftHelper
 {

@@ -2,6 +2,8 @@
 
 public readonly struct Constants
 {
+    // TODO: think here hot to optimize the data - maybe call to Azure DevOps or move to configuration file???!!!
+    
     /// <summary>
     /// List of user identities to sue in the application for PRs and others.
     /// </summary>

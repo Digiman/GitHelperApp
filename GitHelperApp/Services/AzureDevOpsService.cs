@@ -1,29 +1,30 @@
 ﻿using GitHelperApp.Configuration;
+using GitHelperApp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.WebApi;
 
-namespace GitHelperApp;
+namespace GitHelperApp.Services;
 
-/// <summary>
-/// Helper logic to work with the Azure DevOps via client and REST API.
-/// </summary>
-public class AzureDevOpsHelper
+public sealed class AzureDevOpsService : IAzureDevOpsService
 {
+    private readonly ILogger<AzureDevOpsService> _logger;
     private readonly GitHttpClient _gitClient;
     private readonly AzureDevOpsConfig _config;
     private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
     
-    public AzureDevOpsHelper(AzureDevOpsConfig config)
+    public AzureDevOpsService(ILogger<AzureDevOpsService> logger, IOptions<AzureDevOpsConfig> config)
     {
-        _config = config;
-        
-        var vstsCollectionUrl = config.CollectionUrl;
-        var teamProject = config.TeamProject;
+        _config = config.Value;
+        _logger = logger;
 
-        var creds = new VssBasicCredential(string.Empty, config.Token);
+        var vstsCollectionUrl = _config.CollectionUrl;
+
+        var creds = new VssBasicCredential(string.Empty, _config.Token);
         var connection = new VssConnection(new Uri(vstsCollectionUrl), creds); 
 
         _gitClient = connection.GetClient<GitHttpClient>();
@@ -100,6 +101,20 @@ public class AzureDevOpsHelper
             Top = 100
         }, repository.Id);
         return actualCommits;
+    }
+
+    public async Task<GitCommitDiffs> GetCommitsDiffsAsync(GitRepository repository, string teamProject, string source, string destination)
+    {
+        var result = await _gitClient.GetCommitDiffsAsync(teamProject, repository.Id,
+            null, 100, null,
+            new GitBaseVersionDescriptor
+            {
+                Version = source
+            }, new GitTargetVersionDescriptor
+            {
+                Version = destination
+            });
+        return result;
     }
 
     public async Task<List<WorkItem>> GetWorkItemsAsync(List<GitCommitRef> commits)

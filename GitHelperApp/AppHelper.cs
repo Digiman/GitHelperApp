@@ -1,4 +1,8 @@
-﻿using Microsoft.TeamFoundation.SourceControl.WebApi;
+﻿using GitHelperApp.Builders;
+using GitHelperApp.Configuration;
+using GitHelperApp.Extensions;
+using GitHelperApp.Models;
+using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 namespace GitHelperApp;
@@ -116,7 +120,7 @@ public static class AppHelper
     /// <param name="pullRequestModel">Model with information for PR to be created.</param>
     /// <returns>Returns the PR result with details on each PR created/existed.</returns>
     public static async Task<List<PullRequestResult>> CreatePullRequestsAsync(RepositoriesConfig repositoriesConfig,
-        List<CompareResult> compareResults, AzureDevOpsConfig azureConfig, PullRequestModel pullRequestModel)
+        List<CompareResult> compareResults, AzureDevOpsConfig azureConfig, PullRequestConfig pullRequestModel)
     {
         var result = new List<PullRequestResult>();
 
@@ -137,7 +141,7 @@ public static class AppHelper
     }
 
     private static async Task<PullRequestResult> CreatePullRequestAsync(AzureDevOpsHelper helper, string repositoryName,
-        string teamProject, string sourceBranch, string destinationBranch, PullRequestModel pullRequestModel)
+        string teamProject, string sourceBranch, string destinationBranch, PullRequestConfig pullRequestModel)
     {
         var repo = await helper.GetRepositoryByNameAsync(repositoryName, teamProject);
         var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Active);

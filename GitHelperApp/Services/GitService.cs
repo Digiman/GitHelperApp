@@ -1,10 +1,15 @@
+﻿using GitHelperApp.Services.Interfaces;
 using LibGit2Sharp;
 
-namespace GitHelperApp;
+namespace GitHelperApp.Services;
 
-public static class GitHelper
+/// <summary>
+/// Service for using the LibGit2Sharp for working with local repositories.
+/// Learn more here: https://github.com/libgit2/libgit2sharp
+/// </summary>
+public sealed class GitService : IGitService
 {
-    public static List<string> GetBranchesList(string repoPath)
+    public List<string> GetBranchesList(string repoPath)
     {
         List<Branch> allBranches;
         
@@ -16,7 +21,7 @@ public static class GitHelper
         return allBranches.Select(x => x.FriendlyName).ToList();
     }
     
-    public static (bool isChanges, int count, List<string> commits) CompareBranches(string repoPath, string source, string destination)
+    public (bool isChanges, int count, List<string> commits) CompareBranches(string repoPath, string source, string destination)
     {
         using (var repository = new Repository(repoPath))
         {
@@ -42,6 +47,4 @@ public static class GitHelper
 
         return (false, 0, new List<string>());
     }
-    
-    public static string GetRefName(string branchName) => $"origin/{branchName}";
 }

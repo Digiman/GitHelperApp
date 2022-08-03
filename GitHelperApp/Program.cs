@@ -1,59 +1,68 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using GitHelperApp;
+﻿using System.Reflection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Serilog;
 
-var config = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .Build();
+namespace GitHelperApp;
 
-// unique run id to use in file names
-var runId = Guid.NewGuid().ToString("N");
-
-// ----------------------------------------------------------------
-// 1. Compare all repositories and get changes details.
-var reposConfig = config.GetSection("RepositoryConfig").Get<RepositoriesConfig>();
-
-var compareResults = AppHelper.DoCompare(reposConfig);
-
-// print original compare results
-AppHelper.OutputCompareResults(reposConfig, compareResults, runId, true, true);
-
-// ----------------------------------------------------------------
-// 2. Get and process details with Azure DevOps to crete needed PRs
-
-// work with the Azure DevOps
-var azureConfig = config.GetSection("AzureDevOps").Get<AzureDevOpsConfig>();
-
-// simple model with the data for PR to be created - can be loaded from the file or from command options
-var prModel = new PullRequestModel
+internal static class Program
 {
-    Title = "Sprint 8 Draft Release Automated",
-    Description = "Automated PR from the tool",
-    IsDraft = true
-};
+    /// <summary>
+    /// Prefix for all environment variables.
+    /// </summary>
+    private const string Prefix = "GHA_"; // GitHelperApp
 
-var prResults = await AppHelper.CreatePullRequestsAsync(reposConfig, compareResults, azureConfig, prModel);
+    /// <summary>
+    /// Default file with settings for application.
+    /// </summary>
+    private const string AppSettings = "appsettings.json";
 
-Console.WriteLine($"PR processed: {prResults.Count}");
+    /// <summary>
+    /// Host settings.
+    /// </summary>
+    private const string HostSettings = "hostsettings.json";
 
-// process the full result and print to file and console
-AppHelper.ProcessFullResult(reposConfig, compareResults, prResults, runId, true, true);
+    /// <summary>
+    /// Prefix for file with application settings for different environments.
+    /// </summary>
+    private const string AppSettingsPrefix = "appsettings";
 
-// ----------------------------------------------------------------
+    /// <summary>
+    /// Entry point of the application.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    static async Task<int> Main(string[] args)
+    {
+        // Get current directory.
+        var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-// await GetPullRequestsDetails();
-//
-// async Task GetPullRequestsDetails()
-// {
-//     var azureConfig = config.GetSection("AzureDevOps").Get<AzureDevOpsConfig>();
-//     
-//     var helper = new AzureDevOpsHelper(azureConfig);
-//
-//     // var repositoryName = "featureflag-service";
-//     var repositoryName = "buyers-platform";
-//     var repo = await helper.GetRepositoryByNameAsync(repositoryName, azureConfig.TeamProject);
-//     var prs = await helper.GetPullRequestsAsync(repo, PullRequestStatus.Completed);
-//
-//     var createdBy = prs.Select(x => x.CreatedBy).ToList();
-// }
+        // build and run Host
+        return await CreateHostBuilder(appLocation)
+            .RunCommandLineApplicationAsync<Application>(args);
+    }
+
+    /// <summary>
+    /// Create and configure host with settings and other things.
+    /// </summary>
+    /// <returns>Returns configured host builder to build and run.</returns>
+    private static IHostBuilder CreateHostBuilder(string appLocation) =>
+        new HostBuilder()
+            .ConfigureHostConfiguration(configHost =>
+            {
+                configHost.SetBasePath(appLocation);
+                configHost.AddJsonFile(HostSettings, true);
+                configHost.AddEnvironmentVariables(Prefix);
+            }).ConfigureAppConfiguration((hostContext, configApp) =>
+            {
+                configApp.SetBasePath(appLocation);
+                configApp.AddJsonFile(AppSettings, optional: true);
+                configApp.AddJsonFile($"{AppSettingsPrefix}.{hostContext.HostingEnvironment.EnvironmentName}.json",
+                    optional: true);
+                configApp.AddEnvironmentVariables(prefix: Prefix);
+            })
+            .ConfigureServices((hostContext, services) =>
+            {
+                services.InitializeDependencies(hostContext.Configuration);
+            })
+            .UseSerilog((hostContext, configLog) => { configLog.ReadFrom.Configuration(hostContext.Configuration); });
+}
