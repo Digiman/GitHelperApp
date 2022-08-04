@@ -11,7 +11,7 @@
       "commandName": "Project",
       "commandLineArgs": "compare-local -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "Local"
+        "GHA_ENVIRONMENT": "RD"
       }
     },
     "GitHelperApp-CompareAzure": {

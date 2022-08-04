@@ -1,5 +1,6 @@
 ﻿using GitHelperApp.Services.Interfaces;
 using LibGit2Sharp;
+using Microsoft.Extensions.Logging;
 
 namespace GitHelperApp.Services;
 
@@ -9,6 +10,13 @@ namespace GitHelperApp.Services;
 /// </summary>
 public sealed class GitService : IGitService
 {
+    private readonly ILogger<GitService> _logger;
+
+    public GitService(ILogger<GitService> logger)
+    {
+        _logger = logger;
+    }
+
     public List<string> GetBranchesList(string repoPath)
     {
         List<Branch> allBranches;
@@ -25,23 +33,32 @@ public sealed class GitService : IGitService
     {
         using (var repository = new Repository(repoPath))
         {
-            var changes = repository.Diff.Compare<TreeChanges>(
-                repository.Branches[source].Tip.Tree,
-                repository.Branches[destination].Tip.Tree);
-            
-            var filter = new CommitFilter
+            if (repository.Branches[source] != null && repository.Branches[destination] != null)
             {
-                SortBy = CommitSortStrategies.Reverse | CommitSortStrategies.Time,
-                ExcludeReachableFrom = repository.Branches[destination].Tip,
-                IncludeReachableFrom = repository.Branches[source].Tip
-            };
-            
-            var commitLog = repository.Commits.QueryBy(filter);
-            
-            if (changes.Count > 0)
+                var changes = repository.Diff.Compare<TreeChanges>(
+                    repository.Branches[source].Tip.Tree,
+                    repository.Branches[destination].Tip.Tree);
+
+                var filter = new CommitFilter
+                {
+                    SortBy = CommitSortStrategies.Reverse | CommitSortStrategies.Time,
+                    ExcludeReachableFrom = repository.Branches[destination].Tip,
+                    IncludeReachableFrom = repository.Branches[source].Tip
+                };
+
+                var commitLog = repository.Commits.QueryBy(filter);
+
+                if (changes.Count > 0)
+                {
+                    var commits = commitLog.Select(x => x.Id.Sha).ToList();
+                    return (true, changes.Count, commits);
+                }
+            }
+            else
             {
-                var commits = commitLog.Select(x => x.Id.Sha).ToList();
-                return (true, changes.Count, commits);
+                _logger.LogWarning("Branches can't be compared because some of them or both not exists!");
+                
+                return (false, 0, new List<string>());
             }
         }
 
