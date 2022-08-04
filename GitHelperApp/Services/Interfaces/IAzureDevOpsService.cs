@@ -4,6 +4,9 @@ using Microsoft.VisualStudio.Services.WebApi;
 
 namespace GitHelperApp.Services.Interfaces;
 
+/// <summary>
+/// The service to work with Azure DevOps via API to do some stuff from application.
+/// </summary>
 public interface IAzureDevOpsService
 {
     Task<List<string>> GetRepositoriesAsync(string teamProject);

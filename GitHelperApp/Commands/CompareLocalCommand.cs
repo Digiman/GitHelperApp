@@ -4,7 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace GitHelperApp.Commands;
 
-public class CompareLocalCommand : ICustomCommand
+/// <summary>
+/// Command to do local compare between branches for local repositories with Lib2gitCsharp.
+/// </summary>
+public sealed class CompareLocalCommand : ICustomCommand
 {
     private readonly ILogger<CompareLocalCommand> _logger;
     private readonly ICompareService _compareService;

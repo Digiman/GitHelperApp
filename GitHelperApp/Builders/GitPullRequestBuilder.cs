@@ -4,6 +4,9 @@ using Microsoft.VisualStudio.Services.WebApi;
 
 namespace GitHelperApp.Builders;
 
+/// <summary>
+/// Builder logic for Pull Request.
+/// </summary>
 public sealed class GitPullRequestBuilder
 {
     private readonly GitPullRequest _pullRequest;

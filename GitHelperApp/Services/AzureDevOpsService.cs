@@ -10,6 +10,9 @@ using Microsoft.VisualStudio.Services.WebApi;
 
 namespace GitHelperApp.Services;
 
+/// <summary>
+/// The service to work with Azure DevOps via API to do some stuff from application.
+/// </summary>
 public sealed class AzureDevOpsService : IAzureDevOpsService
 {
     private readonly ILogger<AzureDevOpsService> _logger;

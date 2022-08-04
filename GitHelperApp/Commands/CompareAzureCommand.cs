@@ -4,7 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace GitHelperApp.Commands;
 
-public class CompareAzureCommand: ICustomCommand
+/// <summary>
+/// Command to do compare for repositories between branches on Azure DevOps with APIs.
+/// </summary>
+public sealed class CompareAzureCommand: ICustomCommand
 {
     private readonly ILogger<CompareAzureCommand> _logger;
     private readonly ICompareService _compareService;

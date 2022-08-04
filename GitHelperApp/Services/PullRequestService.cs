@@ -10,6 +10,9 @@ using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 namespace GitHelperApp.Services;
 
+/// <summary>
+/// Service to work with Pull Requests.
+/// </summary>
 public sealed class PullRequestService : IPullRequestService
 {
     private readonly ILogger<PullRequestService> _logger;
@@ -28,13 +31,8 @@ public sealed class PullRequestService : IPullRequestService
         _pullRequestConfig = pullRequestModel.Value;
         _repositoriesConfig = repositoriesConfig.Value;
     }
-
-    /// <summary>
-    /// Create the PR for all repositories with changes exists.
-    /// </summary>
-    /// <param name="compareResults">Compare results from the first step.</param>
-    /// <param name="isDryRun">Run in rey run mode without actual PR creation.</param>
-    /// <returns>Returns the PR result with details on each PR created/existed.</returns>
+    
+    /// <inheritdoc />
     public async Task<List<PullRequestResult>> CreatePullRequestsAsync(List<CompareResult> compareResults, bool isDryRun = false)
     {
         var result = new List<PullRequestResult>();
@@ -54,6 +52,8 @@ public sealed class PullRequestService : IPullRequestService
         return result;
     }
     
+    #region Helpers.
+    
     private async Task<PullRequestResult> CreatePullRequestAsync(string repositoryName, string teamProject, 
         string sourceBranch, string destinationBranch, PullRequestConfig pullRequestModel, bool isDryRun = false)
     {
@@ -69,7 +69,7 @@ public sealed class PullRequestService : IPullRequestService
 
             if (gitCommits.Count == 0)
             {
-                _logger.LogWarning("Something goes wrong and no changes found for PR!");
+                _logger.LogWarning("Something goes wrong and no changes found to create the PR!");
             }
             else
             {
@@ -78,13 +78,13 @@ public sealed class PullRequestService : IPullRequestService
                 workItems = ProcessWorkItems(workItems);
 
                 var builder = new GitPullRequestBuilder(prTitle, pullRequestModel.Description, sourceBranch, destinationBranch);
-                builder = builder
+                builder
                     .WithAuthor(pullRequestModel.Author)
                     .WithWorkItems(workItems)
                     .WthDefaultReviewers();
                 if (pullRequestModel.IsDraft)
                 {
-                    builder = builder.AsDraft();
+                    builder.AsDraft();
                 }
 
                 var pr = builder.Build();
@@ -150,4 +150,6 @@ public sealed class PullRequestService : IPullRequestService
             x.Title == title && x.SourceRefName == GitPullRequestBuilder.GetRefName(source)
                              && x.TargetRefName == GitPullRequestBuilder.GetRefName(destination));
     }
+    
+    #endregion
 }

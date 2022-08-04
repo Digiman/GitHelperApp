@@ -2,6 +2,9 @@ using GitHelperApp.Models;
 
 namespace GitHelperApp.Services.Interfaces;
 
+/// <summary>
+/// Service to do some processing for results to output to console and file.
+/// </summary>
 public interface IOutputService
 {
     string InitializeOutputBatch();

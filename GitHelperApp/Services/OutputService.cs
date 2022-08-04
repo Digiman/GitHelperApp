@@ -6,6 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace GitHelperApp.Services;
 
+/// <summary>
+/// Service to do some processing for results to output to console and file.
+/// </summary>
 public sealed class OutputService : IOutputService
 {
     private readonly ILogger<OutputService> _logger;
@@ -63,10 +66,10 @@ public sealed class OutputService : IOutputService
         // 2. Process PR result.
         lines.AddRange(ProcessPrResults(prResults));
 
-        // output only PR IDs to separate file
+        // output only PRs to separate file
         ProcessPrsResult(prResults, id, isPrintToConsole, isPrintToFile);
 
-        // output work items only in summary file
+        // output work items only to separate file
         ProcessWorkItemsResult(prResults, id, isPrintToConsole, isPrintToFile);
         
         if (isPrintToConsole)
@@ -119,6 +122,7 @@ public sealed class OutputService : IOutputService
     {
         var lines = new List<string>();
         
+        // 1. Details for each PR.
         var index = 1;
         foreach (var pullRequestResult in prResults)
         {
@@ -133,7 +137,13 @@ public sealed class OutputService : IOutputService
         
         lines.Add(Environment.NewLine);
         
-        // process the list of Work Items to have unique list at the end of log file
+        // 2. PR summary
+        lines.Add($"Pull Requests summary:");
+        lines.AddRange(prResults.Where(x => x.PullRequestId != 0).Select(pr => $"\t{pr.Url}"));
+        
+        lines.Add(Environment.NewLine);
+        
+        // 3. Process the list of Work Items to have unique list at the end of log file
         var workItems = ProcessUniqueWorkItems(prResults);
         
         lines.Add($"Work items summary ({workItems.Count}):");
@@ -144,7 +154,9 @@ public sealed class OutputService : IOutputService
     
     private void ProcessPrsResult(List<PullRequestResult> prResults, string id, bool isPrintToConsole, bool isPrintToFile)
     {
-        var lines = prResults.Select(x => x.PullRequestId.ToString()).ToList();
+        var lines = new List<string>();
+        lines.Add($"Pull Requests summary:");
+        lines.AddRange(prResults.Where(x => x.PullRequestId != 0).Select(pr => $"\tPullRequestId: {pr.PullRequestId}. Url: {pr.Url}"));
         
         if (isPrintToConsole)
         {

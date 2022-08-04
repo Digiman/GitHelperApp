@@ -1,12 +1,13 @@
-﻿using GitHelperApp.Configuration;
-using GitHelperApp.Models;
-using GitHelperApp.Services.Interfaces;
+﻿using GitHelperApp.Services.Interfaces;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 
 namespace GitHelperApp.Commands;
 
-public class CreatePrCommand : ICustomCommand
+/// <summary>
+/// Command to run the process to create PRs for all repositories with changes.
+/// </summary>
+public sealed class CreatePrCommand : ICustomCommand
 {
     private readonly ILogger<CreatePrCommand> _logger;
     private readonly ICompareService _compareService;
