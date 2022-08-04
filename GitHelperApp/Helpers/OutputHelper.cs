@@ -1,6 +1,6 @@
 ﻿using GitHelperApp.Configuration;
 
-namespace GitHelperApp;
+namespace GitHelperApp.Helpers;
 
 public static class OutputHelper
 {

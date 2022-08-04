@@ -69,7 +69,27 @@ public sealed class PullRequestService : IPullRequestService
 
             if (gitCommits.Count == 0)
             {
-                _logger.LogWarning("Something goes wrong and no changes found to create the PR!");
+                _logger.LogWarning("Something goes wrong and no changes found to create the PR! Trying to search completed PR...");
+                
+                // search for PR that can already created and completed
+                var completedPrs = await _azureDevOpsService.GetPullRequestsAsync(repo, PullRequestStatus.Completed);
+
+                var completedPr = SearchForPrCreated(completedPrs, prTitle, sourceBranch, destinationBranch);
+                if (completedPr != null)
+                {
+                    var workItemsForCompletedPr = await _azureDevOpsService.GetPullRequestDetailsAsync(repo, completedPr.PullRequestId);
+
+                    _logger.LogInformation($"PR already created with Id {completedPr.PullRequestId}. Url: {completedPr.Url}. Work items count: {workItemsForCompletedPr.Count}.");
+
+                    return new PullRequestResult
+                    {
+                        PullRequestId = completedPr.PullRequestId,
+                        RepositoryName = repositoryName,
+                        Url = _azureDevOpsService.BuildPullRequestUrl(teamProject, repositoryName, completedPr.PullRequestId),
+                        WorkItems = workItemsForCompletedPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id))).ToList(),
+                        IsNew = false
+                    };
+                }
             }
             else
             {
@@ -97,7 +117,8 @@ public sealed class PullRequestService : IPullRequestService
                         PullRequestId = 0,
                         RepositoryName = repositoryName,
                         Url = string.Empty,
-                        WorkItems = workItems.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList()
+                        WorkItems = workItems.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList(),
+                        IsNew = true
                     };
                 }
 
@@ -110,21 +131,35 @@ public sealed class PullRequestService : IPullRequestService
                     PullRequestId = prCreated.PullRequestId,
                     RepositoryName = repositoryName,
                     Url = _azureDevOpsService.BuildPullRequestUrl(teamProject, repositoryName, prCreated.PullRequestId),
-                    WorkItems = workItems.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList()
+                    WorkItems = workItems.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList(),
+                    IsNew = true
                 };
             }
         }
+        else
+        {
+            var workItemsForActualPr = await _azureDevOpsService.GetPullRequestDetailsAsync(repo, actualPr.PullRequestId);
 
-        var workItemsForActualPr = await _azureDevOpsService.GetPullRequestDetailsAsync(repo, actualPr.PullRequestId);
+            _logger.LogInformation($"PR already created with Id {actualPr.PullRequestId}. Url: {actualPr.Url}. Work items count: {workItemsForActualPr.Count}.");
 
-        _logger.LogInformation($"PR already created with Id {actualPr.PullRequestId}. Url: {actualPr.Url}. Work items count: {workItemsForActualPr.Count}.");
+            return new PullRequestResult
+            {
+                PullRequestId = actualPr.PullRequestId,
+                RepositoryName = repositoryName,
+                Url = _azureDevOpsService.BuildPullRequestUrl(teamProject, repositoryName, actualPr.PullRequestId),
+                WorkItems = workItemsForActualPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id))).ToList(),
+                IsNew = false
+            };
+        }
 
+        // return empty result
         return new PullRequestResult
         {
-            PullRequestId = actualPr.PullRequestId,
+            PullRequestId = 0,
             RepositoryName = repositoryName,
-            Url = _azureDevOpsService.BuildPullRequestUrl(teamProject, repositoryName, actualPr.PullRequestId),
-            WorkItems = workItemsForActualPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id))).ToList()
+            Url = string.Empty,
+            WorkItems = new List<WorkItemModel>(),
+            IsNew = false
         };
     }
     
@@ -147,8 +182,10 @@ public sealed class PullRequestService : IPullRequestService
     private static GitPullRequest SearchForPrCreated(List<GitPullRequest> pullRequests, string title, string source, string destination)
     {
         return pullRequests.FirstOrDefault(x =>
-            x.Title == title && x.SourceRefName == GitPullRequestBuilder.GetRefName(source)
-                             && x.TargetRefName == GitPullRequestBuilder.GetRefName(destination));
+            (x.Title == title && x.SourceRefName == GitPullRequestBuilder.GetRefName(source)
+                              && x.TargetRefName == GitPullRequestBuilder.GetRefName(destination))
+            || (x.SourceRefName == GitPullRequestBuilder.GetRefName(source)
+                && x.TargetRefName == GitPullRequestBuilder.GetRefName(destination)));
     }
     
     #endregion

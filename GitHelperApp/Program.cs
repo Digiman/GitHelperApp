@@ -31,7 +31,7 @@ internal static class Program
     /// Entry point of the application.
     /// </summary>
     /// <param name="args">Command line arguments.</param>
-    static async Task<int> Main(string[] args)
+    private static async Task<int> Main(string[] args)
     {
         // Get current directory.
         var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

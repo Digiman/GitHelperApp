@@ -40,7 +40,7 @@
       <None Update="hostsettings.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="appsettings.Local.json">
+      <None Update="appsettings.DR.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="appsettings.RD.json">

@@ -1,4 +1,5 @@
 ﻿using GitHelperApp.Configuration;
+using GitHelperApp.Helpers;
 using GitHelperApp.Models;
 using GitHelperApp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -67,7 +68,10 @@ public sealed class OutputService : IOutputService
         lines.AddRange(ProcessPrResults(prResults));
 
         // output only PRs to separate file
-        ProcessPrsResult(prResults, id, isPrintToConsole, isPrintToFile);
+        if (prResults.Any(x => x.PullRequestId != 0))
+        {
+            ProcessPrsResult(prResults, id, isPrintToConsole, isPrintToFile);
+        }
 
         // output work items only to separate file
         ProcessWorkItemsResult(prResults, id, isPrintToConsole, isPrintToFile);
@@ -138,11 +142,14 @@ public sealed class OutputService : IOutputService
         lines.Add(Environment.NewLine);
         
         // 2. PR summary
-        lines.Add($"Pull Requests summary:");
-        lines.AddRange(prResults.Where(x => x.PullRequestId != 0).Select(pr => $"\t{pr.Url}"));
-        
-        lines.Add(Environment.NewLine);
-        
+        if (prResults.Any(x => x.PullRequestId != 0))
+        {
+            lines.Add($"Pull Requests summary:");
+            lines.AddRange(prResults.Where(x => x.PullRequestId != 0).Select(pr => $"\t{pr.Url}"));
+
+            lines.Add(Environment.NewLine);
+        }
+
         // 3. Process the list of Work Items to have unique list at the end of log file
         var workItems = ProcessUniqueWorkItems(prResults);
         
