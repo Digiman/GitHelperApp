@@ -34,6 +34,13 @@
       "environmentVariables": {
         "GHA_ENVIRONMENT": "DR"
       }
+    },
+    "GitHelperApp-SearchPr": {
+      "commandName": "Project",
+      "commandLineArgs": "search-pr -pf true -s a",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "RM"
+      }
     }
   }
 }

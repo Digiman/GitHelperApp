@@ -14,4 +14,6 @@ public interface IPullRequestService
     /// <param name="isDryRun">Run in rey run mode without actual PR creation.</param>
     /// <returns>Returns the PR result with details on each PR created/existed.</returns>
     Task<List<PullRequestResult>> CreatePullRequestsAsync(List<CompareResult> compareResults, bool isDryRun = false);
+    
+    Task<List<PullRequestSearchResult>> SearchPullRequestsAsync(string status);
 }

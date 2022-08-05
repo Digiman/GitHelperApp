@@ -48,7 +48,7 @@ public sealed class CompareLocalCommand : ICustomCommand
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occured during processing local comparing for repositories");
+            _logger.LogError(ex, "Error occured during processing comparing for repositories locally");
             
             throw;
         }

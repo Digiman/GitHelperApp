@@ -51,6 +51,41 @@ public sealed class PullRequestService : IPullRequestService
 
         return result;
     }
+
+    public async Task<List<PullRequestSearchResult>> SearchPullRequestsAsync(string status)
+    {
+        var result = new List<PullRequestSearchResult>();
+
+        var prStatus = ConvertStatus(status);
+        
+        foreach (var repositoryConfig in _repositoriesConfig.Repositories)
+        {
+            _logger.LogInformation($"Searching for Pull Request in the {repositoryConfig.Name}...");
+            
+            var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryConfig.Name, repositoryConfig.TeamProject);
+            var prs = await _azureDevOpsService.GetPullRequestsAsync(repo, prStatus);
+
+            foreach (var gitPullRequest in prs)
+            {
+                var workItemsFlorPr = await _azureDevOpsService.GetPullRequestDetailsAsync(repo, gitPullRequest.PullRequestId);
+
+                var prResult = new PullRequestSearchResult
+                {
+                    PullRequestId = gitPullRequest.PullRequestId,
+                    Title = gitPullRequest.Title,
+                    Description = gitPullRequest.Description,
+                    RepositoryName = repositoryConfig.Name,
+                    Url = _azureDevOpsService.BuildPullRequestUrl(repositoryConfig.TeamProject, repo.Name, gitPullRequest.PullRequestId),
+                    WorkItems = workItemsFlorPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(repositoryConfig.TeamProject, x.Id))).ToList(),
+                    IsNew = false
+                };
+                
+                result.Add(prResult);
+            }
+        }
+
+        return result;
+    }
     
     #region Helpers.
     
@@ -186,6 +221,18 @@ public sealed class PullRequestService : IPullRequestService
                               && x.TargetRefName == GitPullRequestBuilder.GetRefName(destination))
             || (x.SourceRefName == GitPullRequestBuilder.GetRefName(source)
                 && x.TargetRefName == GitPullRequestBuilder.GetRefName(destination)));
+    }
+    
+    private static PullRequestStatus ConvertStatus(object status)
+    {
+        return status switch
+        {
+            "a" => PullRequestStatus.Active,
+            "c" => PullRequestStatus.Completed,
+            "b" => PullRequestStatus.Abandoned,
+            "all" => PullRequestStatus.All,
+            _ => PullRequestStatus.NotSet
+        };
     }
     
     #endregion

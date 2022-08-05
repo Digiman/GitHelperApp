@@ -11,6 +11,7 @@ namespace GitHelperApp;
 [Subcommand(typeof(CompareLocalCommand))]
 [Subcommand(typeof(CompareAzureCommand))]
 [Subcommand(typeof(CreatePrCommand))]
+[Subcommand(typeof(SearchPrCommand))]
 public sealed class Application
 {
     /// <summary>

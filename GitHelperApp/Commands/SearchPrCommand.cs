@@ -5,14 +5,13 @@ using Microsoft.Extensions.Logging;
 namespace GitHelperApp.Commands;
 
 /// <summary>
-/// Command to run the process to create PRs for all repositories with changes.
+/// Command to search the PR in the repositories to get the list of them with details.
 /// </summary>
-public sealed class CreatePrCommand : ICustomCommand
+public sealed class SearchPrCommand : ICustomCommand
 {
-    private readonly ILogger<CreatePrCommand> _logger;
-    private readonly ICompareService _compareService;
-    private readonly IOutputService _outputService;
+    private readonly ILogger<SearchPrCommand> _logger;
     private readonly IPullRequestService _pullRequestService;
+    private readonly IOutputService _outputService;
 
     [Option(CommandOptionType.SingleValue, Description = "Print to console", ShortName = "pc")]
     private bool IsPrintToConsole { get; }
@@ -20,15 +19,14 @@ public sealed class CreatePrCommand : ICustomCommand
     [Option(CommandOptionType.SingleValue, Description = "Print to file", ShortName = "pf")]
     private bool IsPrintToFile { get; }
     
-    [Option(CommandOptionType.SingleValue, Description = "Dry run", ShortName = "d")]
-    private bool DryRun { get; }
+    [Option(CommandOptionType.SingleValue, Description = "PR status", ShortName = "s")]
+    private string Status  { get; }
     
-    public CreatePrCommand(ILogger<CreatePrCommand> logger, ICompareService compareService, IOutputService outputService, IPullRequestService pullRequestService)
+    public SearchPrCommand(ILogger<SearchPrCommand> logger, IPullRequestService pullRequestService, IOutputService outputService)
     {
         _logger = logger;
-        _compareService = compareService;
-        _outputService = outputService;
         _pullRequestService = pullRequestService;
+        _outputService = outputService;
     }
 
     public async Task OnExecuteAsync(CommandLineApplication command, IConsole console)
@@ -39,26 +37,21 @@ public sealed class CreatePrCommand : ICustomCommand
 
             var runId = _outputService.InitializeOutputBatch();
 
-            // 1. Do compare for repositories and branches from configuration file locally with LibGit2Sharp
-            var results = _compareService.CompareLocal();
-
-            _logger.LogInformation("Compare was finished");
-            
             // 2. Do processing to create the PRs
             _logger.LogInformation("Start creating PR for all repository changes...");
             
-            var prResults = await _pullRequestService.CreatePullRequestsAsync(results, DryRun);
+            var prResults = await _pullRequestService.SearchPullRequestsAsync(Status);
             
             _logger.LogInformation($"PR processed: {prResults.Count}");
             
             // 3. Process the results - output
             _logger.LogInformation("Output compare results...");
             
-            _outputService.OutputFullResult(results, prResults, runId, IsPrintToConsole, IsPrintToFile);
+            _outputService.OutputPullRequestsResult(prResults, runId, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occured during processing the repositories and creating PRs (compare and create PR on Azure DevOps)");
+            _logger.LogError(ex, "Error occured during searching the PR on Azure DevOps");
 
             throw;
         }

@@ -86,7 +86,15 @@ public sealed class OutputService : IOutputService
             OutputHelper.OutputResultToFile(lines, CreateFilenameForFullResults(_appConfig.OutputDirectory, id));
         }
     }
-    
+
+    public void OutputPullRequestsResult(List<PullRequestSearchResult> prResults, string runId, bool isPrintToConsole, bool isPrintToFile)
+    {
+        if (prResults.Any(x => x.PullRequestId != 0))
+        {
+            ProcessPrsResult(prResults, runId, isPrintToConsole, isPrintToFile);
+        }    
+    }
+
     #region Helpers.
     
     private static List<string> ProcessCompareResults(RepositoriesConfig repositoriesConfig, IReadOnlyCollection<CompareResult> results)
@@ -212,6 +220,30 @@ public sealed class OutputService : IOutputService
         }
 
         return uniqueWorkItems;
+    }
+    
+    private void ProcessPrsResult(List<PullRequestSearchResult> prResults, string id, bool isPrintToConsole, bool isPrintToFile)
+    {
+        var lines = new List<string>();
+        lines.Add($"Pull Requests:");
+
+        var groups = prResults.GroupBy(x => x.RepositoryName);
+        foreach (var group in groups)
+        {
+            lines.Add($"  Repository name: {group.Key}. Pull Requests ({group.Count()}):");
+            lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(pr => $"    PullRequestId: {pr.PullRequestId}. Title: {pr.Title}. Url: {pr.Url}"));
+            lines.Add(Environment.NewLine);
+        }
+        
+        if (isPrintToConsole)
+        {
+            OutputHelper.OutputResultToConsole(lines);
+        }
+
+        if (isPrintToFile)
+        {
+            OutputHelper.OutputResultToFile(lines, CreateFileNameForPrIds(_appConfig.OutputDirectory, id));
+        }
     }
 
     private static string CreateFilenameForCompareResults(string outputPath, string id) => Path.Combine(outputPath, id, $"Result-{id}.txt");
