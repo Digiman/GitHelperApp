@@ -23,6 +23,9 @@ public sealed class SearchPrCommand : ICustomCommand
     [Option(CommandOptionType.SingleValue, Description = "PR status", ShortName = "s")]
     private string Status  { get; }
     
+    [Option(CommandOptionType.SingleValue, Description = "Count", ShortName = "c")]
+    private int Count  { get; set; }
+    
     public SearchPrCommand(ILogger<SearchPrCommand> logger, IPullRequestService pullRequestService, IOutputService outputService)
     {
         _logger = logger;
@@ -40,8 +43,13 @@ public sealed class SearchPrCommand : ICustomCommand
 
             // 2. Do processing to create the PRs
             _logger.LogInformation("Start searching the PRs...");
+
+            if (Count == 0)
+            {
+                Count = 10; // set as internal default value (as draft for now)
+            }
             
-            var prResults = await _pullRequestService.SearchPullRequestsAsync(Status);
+            var prResults = await _pullRequestService.SearchPullRequestsAsync(Status, Count);
             
             _logger.LogInformation($"PR processed: {prResults.Count}");
             

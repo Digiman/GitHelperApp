@@ -93,8 +93,8 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         return result;
     }
 
-    public async Task<List<GitPullRequest>> GetPullRequestsWithOptionsAsync(GitRepository repository, PullRequestStatus status,
-        string source = null, string destination = null)
+    public async Task<List<GitPullRequest>> GetPullRequestsWithOptionsAsync(GitRepository repository, 
+        PullRequestStatus status, int top, string source = null, string destination = null)
     {
         var criteria = new GitPullRequestSearchCriteria
         {
@@ -111,7 +111,7 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
             criteria.SourceRefName = source;
         }
 
-        var result = await _gitClient.GetPullRequestsAsync(repository.Id.ToString(), criteria);
+        var result = await _gitClient.GetPullRequestsAsync(repository.Id.ToString(), criteria, top: top);
         return result;
     }
 

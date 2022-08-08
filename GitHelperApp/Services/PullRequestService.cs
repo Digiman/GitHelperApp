@@ -53,7 +53,7 @@ public sealed class PullRequestService : IPullRequestService
     }
 
     /// <inheritdoc />
-    public async Task<List<PullRequestSearchResult>> SearchPullRequestsAsync(string status)
+    public async Task<List<PullRequestSearchResult>> SearchPullRequestsAsync(string status, int count)
     {
         var result = new List<PullRequestSearchResult>();
 
@@ -64,7 +64,7 @@ public sealed class PullRequestService : IPullRequestService
             _logger.LogInformation($"Searching for Pull Request in the {repositoryConfig.Name}...");
             
             var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryConfig.Name, repositoryConfig.TeamProject);
-            var prs = await _azureDevOpsService.GetPullRequestsWithOptionsAsync(repo, prStatus, repositoryConfig.SourceBranch, repositoryConfig.DestinationBranch);
+            var prs = await _azureDevOpsService.GetPullRequestsWithOptionsAsync(repo, prStatus, count, repositoryConfig.SourceBranch, repositoryConfig.DestinationBranch);
 
             foreach (var gitPullRequest in prs)
             {

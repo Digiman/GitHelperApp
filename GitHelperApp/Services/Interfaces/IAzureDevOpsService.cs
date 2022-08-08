@@ -16,7 +16,7 @@ public interface IAzureDevOpsService
     Task<GitRepository> GetRepositoryByNameAsync(string name);
     Task<GitPullRequest> CreatePullRequestAsync(GitPullRequest pullRequest, GitRepository repository);
     Task<List<GitPullRequest>> GetPullRequestsAsync(GitRepository repository, PullRequestStatus status);
-    Task<List<GitPullRequest>> GetPullRequestsWithOptionsAsync(GitRepository repository, PullRequestStatus status, string source = null, string destination = null);
+    Task<List<GitPullRequest>> GetPullRequestsWithOptionsAsync(GitRepository repository, PullRequestStatus status, int top, string source = null, string destination = null);
     Task<List<GitCommitRef>> GetCommitsDetailsAsync(GitRepository repository, string source, string destination);
     Task<GitCommitDiffs> GetCommitsDiffsAsync(GitRepository repository, string teamProject, string source, string destination);
     Task<List<WorkItem>> GetWorkItemsAsync(List<GitCommitRef> commits);
