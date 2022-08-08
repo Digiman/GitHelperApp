@@ -15,5 +15,10 @@ public interface IPullRequestService
     /// <returns>Returns the PR result with details on each PR created/existed.</returns>
     Task<List<PullRequestResult>> CreatePullRequestsAsync(List<CompareResult> compareResults, bool isDryRun = false);
     
+    /// <summary>
+    /// Search for PRs by the status.
+    /// </summary>
+    /// <param name="status">String with status name to search.</param>
+    /// <returns>Returns PR search result.</returns>
     Task<List<PullRequestSearchResult>> SearchPullRequestsAsync(string status);
 }

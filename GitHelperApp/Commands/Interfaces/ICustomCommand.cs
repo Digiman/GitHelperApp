@@ -1,6 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 
-namespace GitHelperApp.Commands;
+namespace GitHelperApp.Commands.Interfaces;
 
 public interface ICustomCommand
 {

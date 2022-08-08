@@ -93,6 +93,28 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         return result;
     }
 
+    public async Task<List<GitPullRequest>> GetPullRequestsWithOptionsAsync(GitRepository repository, PullRequestStatus status,
+        string source = null, string destination = null)
+    {
+        var criteria = new GitPullRequestSearchCriteria
+        {
+            Status = status
+        };
+
+        if (!string.IsNullOrEmpty(destination))
+        {
+            criteria.TargetRefName = destination;
+        }
+        
+        if (!string.IsNullOrEmpty(source))
+        {
+            criteria.SourceRefName = source;
+        }
+
+        var result = await _gitClient.GetPullRequestsAsync(repository.Id.ToString(), criteria);
+        return result;
+    }
+
     public async Task<List<GitCommitRef>> GetCommitsDetailsAsync(GitRepository repository, string source, string destination)
     {
         // compare branches and search for commits

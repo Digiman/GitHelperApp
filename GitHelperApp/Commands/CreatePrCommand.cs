@@ -1,4 +1,5 @@
-﻿using GitHelperApp.Services.Interfaces;
+﻿using GitHelperApp.Commands.Interfaces;
+using GitHelperApp.Services.Interfaces;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 

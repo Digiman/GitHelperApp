@@ -1,4 +1,5 @@
-﻿using GitHelperApp.Services.Interfaces;
+﻿using GitHelperApp.Commands.Interfaces;
+using GitHelperApp.Services.Interfaces;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 
@@ -33,19 +34,19 @@ public sealed class SearchPrCommand : ICustomCommand
     {
         try
         {
-            _logger.LogInformation("Start local comparing for repositories...");
+            _logger.LogInformation($"Searching PR in the repositories (Status: {Status})");
 
             var runId = _outputService.InitializeOutputBatch();
 
             // 2. Do processing to create the PRs
-            _logger.LogInformation("Start creating PR for all repository changes...");
+            _logger.LogInformation("Start searching the PRs...");
             
             var prResults = await _pullRequestService.SearchPullRequestsAsync(Status);
             
             _logger.LogInformation($"PR processed: {prResults.Count}");
             
             // 3. Process the results - output
-            _logger.LogInformation("Output compare results...");
+            _logger.LogInformation("Output search results");
             
             _outputService.OutputPullRequestsResult(prResults, runId, IsPrintToConsole, IsPrintToFile);
         }

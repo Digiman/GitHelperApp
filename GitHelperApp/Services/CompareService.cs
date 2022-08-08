@@ -53,6 +53,8 @@ public sealed class CompareService : ICompareService
                 continue;
             }
 
+            _logger.LogInformation($"Repository: {repositoryConfig.Name}. Comparing: {repositoryConfig.SourceBranch} -> {repositoryConfig.DestinationBranch}");
+            
             var source = !string.IsNullOrEmpty(repositoryConfig.SourceBranch)
                 ? repositoryConfig.SourceBranch
                 : repositoriesConfig.DefaultSourceBranch;
