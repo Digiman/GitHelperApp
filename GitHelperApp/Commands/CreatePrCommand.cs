@@ -38,7 +38,7 @@ public sealed class CreatePrCommand : ICustomCommand
         {
             _logger.LogInformation("Start local comparing for repositories...");
 
-            var runId = _outputService.InitializeOutputBatch();
+            var (runId, directory) = _outputService.InitializeOutputBatch("CreatePr");
 
             // 1. Do compare for repositories and branches from configuration file locally with LibGit2Sharp
             var results = _compareService.CompareLocal();
@@ -55,7 +55,7 @@ public sealed class CreatePrCommand : ICustomCommand
             // 3. Process the results - output
             _logger.LogInformation("Output compare results...");
             
-            _outputService.OutputFullResult(results, prResults, runId, IsPrintToConsole, IsPrintToFile);
+            _outputService.OutputFullResult(results, prResults, runId, directory, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)
         {

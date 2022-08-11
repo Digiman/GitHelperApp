@@ -10,9 +10,14 @@ public static class RepositoryConfigExtensions
         repositoryConfig.SourceBranch = !string.IsNullOrEmpty(repositoryConfig.SourceBranch)
             ? repositoryConfig.SourceBranch
             : repositoriesConfig.DefaultSourceBranch;
+        
         repositoryConfig.DestinationBranch = !string.IsNullOrEmpty(repositoryConfig.DestinationBranch)
             ? repositoryConfig.DestinationBranch
             : repositoriesConfig.DefaultDestinationBranch;
+        
+        repositoryConfig.TeamProject = !string.IsNullOrEmpty(repositoryConfig.TeamProject)
+            ? repositoryConfig.TeamProject
+            : repositoriesConfig.DefaultTeamProject;
 
         return repositoryConfig;
     }

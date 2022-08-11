@@ -7,12 +7,14 @@ namespace GitHelperApp.Services.Interfaces;
 /// </summary>
 public interface IOutputService
 {
-    string InitializeOutputBatch();
+    (string runId, string directory) InitializeOutputBatch(string commandName);
     
-    void OutputCompareResults(List<CompareResult> compareResults, string id, bool isPrintToConsole = true, bool isPrintToFile = false);
+    void OutputCompareResults(List<CompareResult> compareResults, string runId, 
+        string directory, bool isPrintToConsole = true, bool isPrintToFile = false);
 
     void OutputFullResult(List<CompareResult> compareResults, List<PullRequestResult> prResults,
-        string id, bool isPrintToConsole = false, bool isPrintToFile = false);
+        string runId, string directory, bool isPrintToConsole = false, bool isPrintToFile = false);
 
-    void OutputPullRequestsResult(List<PullRequestSearchResult> prResults, string runId, bool isPrintToConsole, bool isPrintToFile);
+    void OutputPullRequestsResult(List<PullRequestSearchResult> prResults, string runId, 
+        string directory, bool isPrintToConsole, bool isPrintToFile);
 }

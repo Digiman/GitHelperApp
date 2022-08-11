@@ -52,25 +52,21 @@ public sealed class CompareService : ICompareService
             {
                 continue;
             }
-
-            _logger.LogInformation($"Repository: {repositoryConfig.Name}. Comparing: {repositoryConfig.SourceBranch} -> {repositoryConfig.DestinationBranch}");
             
-            var source = !string.IsNullOrEmpty(repositoryConfig.SourceBranch)
-                ? repositoryConfig.SourceBranch
-                : repositoriesConfig.DefaultSourceBranch;
-            var destination = !string.IsNullOrEmpty(repositoryConfig.DestinationBranch)
-                ? repositoryConfig.DestinationBranch
-                : repositoriesConfig.DefaultDestinationBranch;
-
+            var repoInfo = repositoryConfig.GetRepositoryConfig(repositoriesConfig);
+            
+            _logger.LogInformation($"Repository: {repoInfo.Name}. Comparing: {repoInfo.SourceBranch} -> {repoInfo.DestinationBranch}");
+            
             var (isChanges, count, commits) = _gitService.CompareBranches(repositoryConfig.Path,
-                GitLocalHelper.GetRefName(source), GitLocalHelper.GetRefName(destination));
+                GitLocalHelper.GetRefName(repoInfo.SourceBranch),
+                GitLocalHelper.GetRefName(repoInfo.DestinationBranch));
 
             result.Add(new CompareResult
             {
                 RepositoryName = repositoryConfig.Name,
                 ChangesCount = count,
-                SourceBranch = source,
-                DestinationBranch = destination,
+                SourceBranch = repoInfo.SourceBranch,
+                DestinationBranch = repoInfo.DestinationBranch,
                 Commits = commits
             });
         }
@@ -83,7 +79,7 @@ public sealed class CompareService : ICompareService
         var result = new List<CompareResult>(repositoriesConfig.Repositories.Count);
         foreach (var repositoryConfig in repositoriesConfig.Repositories)
         {
-            // get extended repo info
+            // get extended repo info - with the default values if not provided
             var repoInfo = repositoriesConfig.GetRepositoryConfig(repositoryConfig.Name);
             
             var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repoInfo.Name, repoInfo.TeamProject);

@@ -23,27 +23,29 @@ public sealed class OutputService : IOutputService
         _appConfig = appConfig.Value;
     }
 
-    public string InitializeOutputBatch()
+    public (string runId, string directory) InitializeOutputBatch(string commandName)
     {
         _logger.LogInformation("Initializing the batch...");
         
         var runId = Guid.NewGuid().ToString("N");
-
+        
+        var directoryName = BuildDirectoryName(commandName);
+        
         if (!Directory.Exists(_appConfig.ToString()))
         {
             Directory.CreateDirectory(_appConfig.OutputDirectory);
         }
 
-        var batchDirectory = Path.Combine(_appConfig.OutputDirectory, runId);
+        var batchDirectory = Path.Combine(_appConfig.OutputDirectory, directoryName);
         if (!Directory.Exists(batchDirectory))
         {
             Directory.CreateDirectory(batchDirectory);
         }
-        
-        return runId;
+
+        return (runId, directoryName);
     }
     
-    public void OutputCompareResults(List<CompareResult> compareResults, string id, bool isPrintToConsole = true, bool isPrintToFile = false)
+    public void OutputCompareResults(List<CompareResult> compareResults, string runId, string directory, bool isPrintToConsole = true, bool isPrintToFile = false)
     {
         var lines = ProcessCompareResults(_repositoriesConfig, compareResults);
 
@@ -54,12 +56,12 @@ public sealed class OutputService : IOutputService
 
         if (isPrintToFile)
         {
-            OutputHelper.OutputResultToFile(lines, CreateFilenameForCompareResults(_appConfig.OutputDirectory, id));
+            OutputHelper.OutputResultToFile(lines, CreateFilenameForCompareResults(_appConfig.OutputDirectory, directory, runId));
         }
     }
     
     public void OutputFullResult(List<CompareResult> compareResults, List<PullRequestResult> prResults, 
-        string id, bool isPrintToConsole = false, bool isPrintToFile = false)
+        string runId, string directory, bool isPrintToConsole = false, bool isPrintToFile = false)
     {
         // 1. Process compare result.
         var lines = ProcessCompareResults(_repositoriesConfig, compareResults);
@@ -70,11 +72,11 @@ public sealed class OutputService : IOutputService
         // output only PRs to separate file
         if (prResults.Any(x => x.PullRequestId != 0))
         {
-            ProcessPrsResult(prResults, id, isPrintToConsole, isPrintToFile);
+            ProcessPrsResult(prResults, runId, directory, isPrintToConsole, isPrintToFile);
         }
 
         // output work items only to separate file
-        ProcessWorkItemsResult(prResults, id, isPrintToConsole, isPrintToFile);
+        ProcessWorkItemsResult(prResults, runId, directory, isPrintToConsole, isPrintToFile);
         
         if (isPrintToConsole)
         {
@@ -83,19 +85,24 @@ public sealed class OutputService : IOutputService
 
         if (isPrintToFile)
         {
-            OutputHelper.OutputResultToFile(lines, CreateFilenameForFullResults(_appConfig.OutputDirectory, id));
+            OutputHelper.OutputResultToFile(lines, CreateFilenameForFullResults(_appConfig.OutputDirectory, directory, runId));
         }
     }
 
-    public void OutputPullRequestsResult(List<PullRequestSearchResult> prResults, string runId, bool isPrintToConsole, bool isPrintToFile)
+    public void OutputPullRequestsResult(List<PullRequestSearchResult> prResults, string runId, string directory, bool isPrintToConsole, bool isPrintToFile)
     {
         if (prResults.Any(x => x.PullRequestId != 0))
         {
-            ProcessPrsResult(prResults, runId, isPrintToConsole, isPrintToFile);
+            ProcessPrsResult(prResults, runId, directory, isPrintToConsole, isPrintToFile);
         }    
     }
 
     #region Helpers.
+    
+    private static string BuildDirectoryName(string commandName)
+    {
+        return $"{commandName}-{DateTime.Now.ToString("dd-MM-yyyy-HH-mm")}";
+    }
     
     private static List<string> ProcessCompareResults(RepositoriesConfig repositoriesConfig, IReadOnlyCollection<CompareResult> results)
     {
@@ -167,7 +174,7 @@ public sealed class OutputService : IOutputService
         return lines;
     }
     
-    private void ProcessPrsResult(List<PullRequestResult> prResults, string id, bool isPrintToConsole, bool isPrintToFile)
+    private void ProcessPrsResult(List<PullRequestResult> prResults, string runId, string directory, bool isPrintToConsole, bool isPrintToFile)
     {
         var lines = new List<string>();
         lines.Add($"Pull Requests summary:");
@@ -180,11 +187,11 @@ public sealed class OutputService : IOutputService
 
         if (isPrintToFile)
         {
-            OutputHelper.OutputResultToFile(lines, CreateFileNameForPrIds(_appConfig.OutputDirectory, id));
+            OutputHelper.OutputResultToFile(lines, CreateFileNameForPrIds(_appConfig.OutputDirectory, directory, runId));
         }
     }
     
-    private void ProcessWorkItemsResult(List<PullRequestResult> prResults, string id, bool isPrintToConsole, bool isPrintToFile)
+    private void ProcessWorkItemsResult(List<PullRequestResult> prResults, string runId, string directory, bool isPrintToConsole, bool isPrintToFile)
     {
         var lines = new List<string>();
         
@@ -201,7 +208,7 @@ public sealed class OutputService : IOutputService
 
         if (isPrintToFile)
         {
-            OutputHelper.OutputResultToFile(lines, CreateFileNameForWorkItems(_appConfig.OutputDirectory, id));
+            OutputHelper.OutputResultToFile(lines, CreateFileNameForWorkItems(_appConfig.OutputDirectory, directory, runId));
         }
     }
 
@@ -222,7 +229,7 @@ public sealed class OutputService : IOutputService
         return uniqueWorkItems;
     }
     
-    private void ProcessPrsResult(List<PullRequestSearchResult> prResults, string id, bool isPrintToConsole, bool isPrintToFile)
+    private void ProcessPrsResult(List<PullRequestSearchResult> prResults, string runId, string directory, bool isPrintToConsole, bool isPrintToFile)
     {
         var lines = new List<string>();
         lines.Add($"Pull Requests:");
@@ -242,17 +249,17 @@ public sealed class OutputService : IOutputService
 
         if (isPrintToFile)
         {
-            OutputHelper.OutputResultToFile(lines, CreateFileNameForPrIds(_appConfig.OutputDirectory, id));
+            OutputHelper.OutputResultToFile(lines, CreateFileNameForPrIds(_appConfig.OutputDirectory, directory, runId));
         }
     }
 
-    private static string CreateFilenameForCompareResults(string outputPath, string id) => Path.Combine(outputPath, id, $"Result-{id}.txt");
+    private static string CreateFilenameForCompareResults(string outputPath, string directory, string runId) => Path.Combine(outputPath, directory, $"Result-{runId}.txt");
 
-    private static string CreateFilenameForFullResults(string outputPath, string id) => Path.Combine(outputPath, id, $"ResultFull-{id}.txt");
+    private static string CreateFilenameForFullResults(string outputPath, string directory, string runId) => Path.Combine(outputPath, directory, $"ResultFull-{runId}.txt");
 
-    private static string CreateFileNameForPrIds(string outputPath, string id) => Path.Combine(outputPath, id, $"Prs-{id}.txt");
+    private static string CreateFileNameForPrIds(string outputPath, string directory, string runId) => Path.Combine(outputPath, directory, $"Prs-{runId}.txt");
 
-    private static string CreateFileNameForWorkItems(string outputPath, string id) => Path.Combine(outputPath, id, $"Wit-{id}.txt");
+    private static string CreateFileNameForWorkItems(string outputPath, string directory, string runId) => Path.Combine(outputPath, directory, $"Wit-{runId}.txt");
 
     #endregion
 }

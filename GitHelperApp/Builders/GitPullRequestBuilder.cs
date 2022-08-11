@@ -1,4 +1,5 @@
-﻿using Microsoft.TeamFoundation.SourceControl.WebApi;
+﻿using Microsoft.TeamFoundation.Core.WebApi;
+using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.WebApi;
 
@@ -66,25 +67,44 @@ public sealed class GitPullRequestBuilder
     
     public GitPullRequestBuilder WthReviewers(List<string> userNames)
     {
-        _pullRequest.Reviewers = userNames.Select(x => new IdentityRefWithVote
+        if (userNames.Any())
         {
-            Id = Constants.Users[x]
-        }).ToArray();
-        
+            _pullRequest.Reviewers = userNames.Select(x => new IdentityRefWithVote
+            {
+                Id = Constants.Users[x]
+            }).ToArray();
+        }
+
         return this;
     }
 
     public GitPullRequestBuilder WithWorkItems(List<WorkItem> workItems)
     {
-        _pullRequest.WorkItemRefs = workItems.Select(x => new ResourceRef
+        if (workItems.Any())
         {
-            Id = x.Id.ToString(),
-            Url = x.Url
-        }).ToArray();
-        
+            _pullRequest.WorkItemRefs = workItems.Select(x => new ResourceRef
+            {
+                Id = x.Id.ToString(),
+                Url = x.Url
+            }).ToArray();
+        }
+
         return this;
     }
-    
+
+    public GitPullRequestBuilder WithTags(string[] tags)
+    {
+        if (tags.Any())
+        {
+            _pullRequest.Labels = tags.Select(tag => new WebApiTagDefinition
+            {
+                Name = tag
+            }).ToArray();
+        }
+
+        return this;
+    }
+
     public static string GetRefName(string branchName) => $"refs/heads/{branchName}";
 
     public GitPullRequest Build()

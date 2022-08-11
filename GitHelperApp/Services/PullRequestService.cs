@@ -17,21 +17,18 @@ public sealed class PullRequestService : IPullRequestService
 {
     private readonly ILogger<PullRequestService> _logger;
     private readonly RepositoriesConfig _repositoriesConfig;
-    private readonly AzureDevOpsConfig _azureDevOpsConfig;
     private readonly IAzureDevOpsService _azureDevOpsService;
     private readonly PullRequestConfig _pullRequestConfig;
 
-    public PullRequestService(ILogger<PullRequestService> logger, IOptions<RepositoriesConfig> repositoriesConfig,
-        IOptions<AzureDevOpsConfig> azureDevOpsConfig, IAzureDevOpsService azureDevOpsService,
-        IOptions<PullRequestConfig> pullRequestModel)
+    public PullRequestService(ILogger<PullRequestService> logger, IAzureDevOpsService azureDevOpsService,
+        IOptions<RepositoriesConfig> repositoriesConfig, IOptions<PullRequestConfig> pullRequestModel)
     {
         _logger = logger;
-        _azureDevOpsConfig = azureDevOpsConfig.Value;
         _azureDevOpsService = azureDevOpsService;
         _pullRequestConfig = pullRequestModel.Value;
         _repositoriesConfig = repositoriesConfig.Value;
     }
-    
+
     /// <inheritdoc />
     public async Task<List<PullRequestResult>> CreatePullRequestsAsync(List<CompareResult> compareResults, bool isDryRun = false)
     {
@@ -62,6 +59,8 @@ public sealed class PullRequestService : IPullRequestService
         foreach (var repositoryConfig in _repositoriesConfig.Repositories)
         {
             _logger.LogInformation($"Searching for Pull Request in the {repositoryConfig.Name}...");
+
+            repositoryConfig.GetRepositoryConfig(_repositoriesConfig);
             
             var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryConfig.Name, repositoryConfig.TeamProject);
             var prs = await _azureDevOpsService.GetPullRequestsWithOptionsAsync(repo, prStatus, count, repositoryConfig.SourceBranch, repositoryConfig.DestinationBranch);
@@ -137,7 +136,8 @@ public sealed class PullRequestService : IPullRequestService
                 builder
                     .WithAuthor(pullRequestModel.Author)
                     .WithWorkItems(workItems)
-                    .WthDefaultReviewers();
+                    .WthDefaultReviewers()
+                    .WithTags(pullRequestModel.Tags);
                 if (pullRequestModel.IsDraft)
                 {
                     builder.AsDraft();

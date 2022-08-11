@@ -39,7 +39,7 @@ public sealed class SearchPrCommand : ICustomCommand
         {
             _logger.LogInformation($"Searching PR in the repositories (Status: {Status})");
 
-            var runId = _outputService.InitializeOutputBatch();
+            var (runId, directory) = _outputService.InitializeOutputBatch("SearchPr");
 
             // 2. Do processing to create the PRs
             _logger.LogInformation("Start searching the PRs...");
@@ -56,7 +56,7 @@ public sealed class SearchPrCommand : ICustomCommand
             // 3. Process the results - output
             _logger.LogInformation("Output search results");
             
-            _outputService.OutputPullRequestsResult(prResults, runId, IsPrintToConsole, IsPrintToFile);
+            _outputService.OutputPullRequestsResult(prResults, runId, directory, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)
         {

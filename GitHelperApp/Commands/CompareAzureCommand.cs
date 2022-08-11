@@ -33,7 +33,7 @@ public sealed class CompareAzureCommand: ICustomCommand
         {
             _logger.LogInformation("Start local comparing for repositories on Azure DevOps...");
             
-            var runId = _outputService.InitializeOutputBatch();
+            var (runId, directory) = _outputService.InitializeOutputBatch("CompareAzure");
 
             // 1. Do compare for repositories and branches from configuration file locally with LibGit2Sharp
             var results = await _compareService.CompareAzureAsync();
@@ -43,7 +43,7 @@ public sealed class CompareAzureCommand: ICustomCommand
             _logger.LogInformation("Output compare results...");
             
             // 2. Process the results
-            _outputService.OutputCompareResults(results, runId, IsPrintToConsole, IsPrintToFile);
+            _outputService.OutputCompareResults(results, runId, directory, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)
         {

@@ -8,10 +8,16 @@ namespace GitHelperApp;
 
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Configure the application dependencies.
+    /// </summary>
+    /// <param name="services">Services collections.</param>
+    /// <param name="configuration">Application configuration.</param>
+    /// <returns>Returns updated services collection.</returns>
     public static IServiceCollection InitializeDependencies(this IServiceCollection services, IConfiguration configuration)
     {
         // register configuration
-        services.Configure<AzureDevOpsConfig>(configuration.GetSection("AzureDevOps"));
+        services.Configure<AzureDevOpsConfig>(configuration.GetSection(nameof(AzureDevOpsConfig)));
         services.Configure<RepositoriesConfig>(configuration.GetSection(nameof(RepositoriesConfig)));
         services.Configure<AppConfig>(configuration.GetSection(nameof(AppConfig)));
         services.Configure<PullRequestConfig>(configuration.GetSection(nameof(PullRequestConfig)));

@@ -37,9 +37,9 @@
     },
     "GitHelperApp-SearchPr": {
       "commandName": "Project",
-      "commandLineArgs": "search-pr -pf true -s completed -c 5",
+      "commandLineArgs": "search-pr -pf true -s active -c 5",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "DR"
+        "GHA_ENVIRONMENT": "RD"
       }
     }
   }

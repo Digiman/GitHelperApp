@@ -2,6 +2,7 @@
 using GitHelperApp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
@@ -156,6 +157,13 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     {
         var result = await _gitClient.GetPullRequestWorkItemRefsAsync(repository.Id.ToString(), pullRequestId);
         return result;
+    }
+
+    public async Task<WebApiTagDefinition> CreatePullRequestLabelAsync(GitRepository repository, string teamProject, 
+        string name, int pullRequestId)
+    {
+        return await _gitClient.CreatePullRequestLabelAsync(new WebApiCreateTagRequestData { Name = name },
+            teamProject, repository.Id, pullRequestId);
     }
     
     public string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId)
