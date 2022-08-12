@@ -63,8 +63,15 @@ public sealed class PullRequestService : IPullRequestService
             repositoryConfig.GetRepositoryConfig(_repositoriesConfig);
             
             var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryConfig.Name, repositoryConfig.TeamProject);
-            var prs = await _azureDevOpsService.GetPullRequestsWithOptionsAsync(repo, prStatus, count, repositoryConfig.SourceBranch, repositoryConfig.DestinationBranch);
-
+            var prsFromSource = await _azureDevOpsService.GetPullRequestsWithOptionsAsync(repo, prStatus, count,
+                source: repositoryConfig.SourceBranch);
+            var prsToDestination = await _azureDevOpsService.GetPullRequestsWithOptionsAsync(repo, prStatus, count,
+                destination: repositoryConfig.DestinationBranch);
+            
+            var prs = new List<GitPullRequest>(prsFromSource.Count + prsToDestination.Count);
+            prs.AddRange(prsFromSource);
+            prs.AddRange(prsToDestination);
+            
             foreach (var gitPullRequest in prs)
             {
                 var workItemsFlorPr = await _azureDevOpsService.GetPullRequestDetailsAsync(repo, gitPullRequest.PullRequestId);

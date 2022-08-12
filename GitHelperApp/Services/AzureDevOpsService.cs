@@ -104,12 +104,12 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
 
         if (!string.IsNullOrEmpty(destination))
         {
-            criteria.TargetRefName = destination;
+            criteria.TargetRefName = GetRefName(destination);
         }
         
         if (!string.IsNullOrEmpty(source))
         {
-            criteria.SourceRefName = source;
+            criteria.SourceRefName = GetRefName(source);
         }
 
         var result = await _gitClient.GetPullRequestsAsync(repository.Id.ToString(), criteria, top: top);
@@ -175,4 +175,6 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     {
         return $"{_config.CollectionUrl}/{teamProject}/_workitems/edit/{workItemId}";
     }
+    
+    public static string GetRefName(string branchName) => $"refs/heads/{branchName}";
 }

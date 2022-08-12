@@ -1,4 +1,6 @@
 ﻿using GitHelperApp.Configuration;
+using GitHelperApp.Generators;
+using GitHelperApp.Generators.Interfaces;
 using GitHelperApp.Services;
 using GitHelperApp.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +30,12 @@ public static class DependencyInjection
         services.AddSingleton<ICompareService, CompareService>();
         services.AddSingleton<IOutputService, OutputService>();
         services.AddSingleton<IPullRequestService, PullRequestService>();
+        
+        // add content generators
+        services.AddSingleton<IContentGeneratorFactory, ContentGeneratorFactory>();
+        
+        // add generators
+        services.AddSingleton<IFileNameGenerator, FileNameGenerator>();
         
         return services;
     }
