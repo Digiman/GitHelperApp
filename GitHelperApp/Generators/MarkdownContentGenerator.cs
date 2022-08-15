@@ -111,7 +111,8 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
         foreach (var group in groups)
         {
             lines.Add($"* Repository name: {group.Key}. Pull Requests ({group.Count()}):");
-            lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(pr => $"    * Title: *{pr.Title}*. PullRequestId: [{pr.PullRequestId}]({pr.Url})"));
+            lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(pr =>
+                $"    * Title: *{pr.Title}*. PullRequestId: [{pr.PullRequestId}]({pr.Url}). From: *'{pr.SourceBranch}'*. To: *'{pr.DestinationBranch}'*."));
             lines.Add(Environment.NewLine);
         }
 

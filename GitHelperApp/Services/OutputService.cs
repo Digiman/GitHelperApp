@@ -113,7 +113,7 @@ public sealed class OutputService : IOutputService
     
     private static string BuildDirectoryName(string commandName)
     {
-        return $"{commandName}-{DateTime.Now.ToString("dd-MM-yyyy-HH-mm")}";
+        return $"{commandName}-{DateTime.Now:dd-MM-yyyy-HH-mm}";
     }
     
     private void ProcessPrsResult(List<PullRequestResult> prResults, string runId, string directory, bool isPrintToConsole, bool isPrintToFile)

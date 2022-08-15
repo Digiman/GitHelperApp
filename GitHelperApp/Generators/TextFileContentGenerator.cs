@@ -110,7 +110,8 @@ public sealed class TextFileContentGenerator : BaseContentGenerator, IContentGen
         foreach (var group in groups)
         {
             lines.Add($"  Repository name: {group.Key}. Pull Requests ({group.Count()}):");
-            lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(pr => $"    PullRequestId: {pr.PullRequestId}. Title: {pr.Title}. Url: {pr.Url}"));
+            lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(pr =>
+                $"    PullRequestId: {pr.PullRequestId}. Title: {pr.Title}. From: '{pr.SourceBranch}' To: '{pr.DestinationBranch}'. Url: {pr.Url}"));
             lines.Add(Environment.NewLine);
         }
 

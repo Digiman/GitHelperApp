@@ -8,9 +8,3 @@ public class PullRequestResult
     public List<WorkItemModel> WorkItems { get; set; }
     public bool IsNew { get; set; }
 }
-
-public sealed class PullRequestSearchResult : PullRequestResult
-{
-    public string Title { get; set; }
-    public string Description { get; set; }
-}
