@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddSingleton<ICompareService, CompareService>();
         services.AddSingleton<IOutputService, OutputService>();
         services.AddSingleton<IPullRequestService, PullRequestService>();
+        services.AddSingleton<IPipelineService, PipelineService>();
         
         // add content generators
         services.AddSingleton<IContentGeneratorFactory, ContentGeneratorFactory>();

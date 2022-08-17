@@ -19,4 +19,9 @@ public sealed class RepositoryConfig
     /// Default project or specific used for repository.
     /// </summary>
     public string TeamProject { get; set; }
+    
+    /// <summary>
+    /// Pipeline Id to use to run the pipeline.
+    /// </summary>
+    public int PipelineId { get; set; }
 }
