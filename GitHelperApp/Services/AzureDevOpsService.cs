@@ -1,6 +1,5 @@
 ﻿using GitHelperApp.Configuration;
 using GitHelperApp.Services.Interfaces;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -16,15 +15,13 @@ namespace GitHelperApp.Services;
 /// </summary>
 public sealed class AzureDevOpsService : IAzureDevOpsService
 {
-    private readonly ILogger<AzureDevOpsService> _logger;
     private readonly GitHttpClient _gitClient;
     private readonly AzureDevOpsConfig _config;
     private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
     
-    public AzureDevOpsService(ILogger<AzureDevOpsService> logger, IOptions<AzureDevOpsConfig> config)
+    public AzureDevOpsService(IOptions<AzureDevOpsConfig> config)
     {
         _config = config.Value;
-        _logger = logger;
 
         var vstsCollectionUrl = _config.CollectionUrl;
 
@@ -150,9 +147,18 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         {
             Ids = workItemIds
         });
+        
         return wits;
     }
-    
+
+    public async Task<List<WorkItem>> GetWorkItemsLAsync(string teamProject, List<GitCommitRef> commits)
+    {
+        var workItemIds = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct();
+        var wits = await _workItemTrackingHttpClient.GetWorkItemsAsync(teamProject, workItemIds);
+        
+        return wits;
+    }
+
     public async Task<List<ResourceRef>> GetPullRequestDetailsAsync(GitRepository repository, int pullRequestId)
     {
         var result = await _gitClient.GetPullRequestWorkItemRefsAsync(repository.Id.ToString(), pullRequestId);
@@ -175,6 +181,6 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     {
         return $"{_config.CollectionUrl}/{teamProject}/_workitems/edit/{workItemId}";
     }
-    
-    public static string GetRefName(string branchName) => $"refs/heads/{branchName}";
+
+    private static string GetRefName(string branchName) => $"refs/heads/{branchName}";
 }

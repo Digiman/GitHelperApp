@@ -11,7 +11,7 @@
       "commandName": "Project",
       "commandLineArgs": "compare-local -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "DR"
+        "GHA_ENVIRONMENT": "RM"
       }
     },
     "GitHelperApp-CompareAzure": {
@@ -25,14 +25,14 @@
       "commandName": "Project",
       "commandLineArgs": "create-pr -pf true -d true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "DR"
+        "GHA_ENVIRONMENT": "RM"
       }
     },
     "GitHelperApp-CreatePr": {
       "commandName": "Project",
       "commandLineArgs": "create-pr -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "DR"
+        "GHA_ENVIRONMENT": "RM"
       }
     },
     "GitHelperApp-SearchPr": {

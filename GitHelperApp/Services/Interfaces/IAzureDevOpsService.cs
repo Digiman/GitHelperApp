@@ -21,6 +21,7 @@ public interface IAzureDevOpsService
     Task<List<GitCommitRef>> GetCommitsDetailsAsync(GitRepository repository, string source, string destination);
     Task<GitCommitDiffs> GetCommitsDiffsAsync(GitRepository repository, string teamProject, string source, string destination);
     Task<List<WorkItem>> GetWorkItemsAsync(List<GitCommitRef> commits);
+    Task<List<WorkItem>> GetWorkItemsLAsync(string teamProject, List<GitCommitRef> commits);
     Task<List<ResourceRef>> GetPullRequestDetailsAsync(GitRepository repository, int pullRequestId);
     Task<WebApiTagDefinition> CreatePullRequestLabelAsync(GitRepository repository, string teamProject, string name, int pullRequestId);
     string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId);

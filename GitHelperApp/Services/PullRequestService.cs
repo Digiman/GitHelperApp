@@ -1,6 +1,7 @@
 ﻿using GitHelperApp.Builders;
 using GitHelperApp.Configuration;
 using GitHelperApp.Extensions;
+using GitHelperApp.Helpers;
 using GitHelperApp.Models;
 using GitHelperApp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -210,18 +211,23 @@ public sealed class PullRequestService : IPullRequestService
     
     private static List<WorkItem> ProcessWorkItems(List<WorkItem> workItems)
     {
+        // filter work items by type and area path to use only correct ones
+        var filtered = WorkItemsHelper.FilterWorkItems(workItems);
+        
         // we need to process here all the WI to exclude duplicates and etc.
-        var uniqueIds = workItems.Select(x => x.Id).Distinct().ToList();
+        var uniqueIds = filtered.Select(x => x.Id).Distinct().ToList();
         var result = new List<WorkItem>(uniqueIds.Count);
-        if (uniqueIds.Count != workItems.Count)
+        if (uniqueIds.Count != filtered.Count)
         {
             foreach (var uniqueId in uniqueIds)
             {
-                result.Add(workItems.FirstOrDefault(x => x.Id == uniqueId));
+                result.Add(filtered.FirstOrDefault(x => x.Id == uniqueId));
             }
+
+            return result;
         }
 
-        return workItems;
+        return filtered;
     }
 
     private static GitPullRequest SearchForPrCreated(List<GitPullRequest> pullRequests, string title, string source, string destination)
