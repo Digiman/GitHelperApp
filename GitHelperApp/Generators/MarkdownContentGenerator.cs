@@ -1,5 +1,6 @@
 ﻿using GitHelperApp.Configuration;
 using GitHelperApp.Generators.Interfaces;
+using GitHelperApp.Generators.Markdown;
 using GitHelperApp.Models;
 
 namespace GitHelperApp.Generators;
@@ -53,7 +54,13 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
             lines.Add($"**{index}: {pullRequestResult.RepositoryName}:**");
             lines.Add($"PR was created with Id [{pullRequestResult.PullRequestId}]({pullRequestResult.Url}). Work items count: {pullRequestResult.WorkItems.Count}.");
             lines.Add("Work items:");
-            lines.AddRange(pullRequestResult.WorkItems.Select(workItemModel => $"* Work Item Id: [{workItemModel.Id}]({workItemModel.Url})"));
+            lines.AddRange(pullRequestResult.WorkItems
+                .Select(x => new
+                {
+                    x.Id,
+                    Url = $"[{x.Id}]({x.Url})"
+                })
+                .ToMarkdownTable(new[] { "Work Item Id", "Url" }));
 
             lines.Add(Environment.NewLine);
             index++;
@@ -74,7 +81,13 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
         var workItems = ProcessUniqueWorkItems(prResults);
 
         lines.Add($"**Work items summary ({workItems.Count}):**");
-        lines.AddRange(workItems.Select(workItemModel => $"* Work Item Id: [{workItemModel.Id}]({workItemModel.Url})"));
+        lines.AddRange(workItems
+            .Select(x => new
+            {
+                x.Id,
+                Url = $"[{x.Id}]({x.Url})"
+            })
+            .ToMarkdownTable(new[] { "Work Item Id", "Url" }));
 
         return lines;
     }
@@ -84,7 +97,12 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
         var lines = new List<string>();
         lines.Add($"**Pull Requests summary:**");
         lines.AddRange(prResults.Where(x => x.PullRequestId != 0)
-            .Select(pr => $"* PullRequestId: [{pr.PullRequestId}]({pr.Url})"));
+            .Select(x => new
+            {
+                x.PullRequestId, 
+                Url = $"[{x.PullRequestId}]({x.Url})"
+            })
+            .ToMarkdownTable(new []{ "PR Id", "Url" }));
 
         return lines;
     }
