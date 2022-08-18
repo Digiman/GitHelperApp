@@ -20,14 +20,17 @@ public sealed class PullRequestService : IPullRequestService
     private readonly RepositoriesConfig _repositoriesConfig;
     private readonly IAzureDevOpsService _azureDevOpsService;
     private readonly PullRequestConfig _pullRequestConfig;
+    private readonly WorkItemFilterConfig _workItemFilterConfig;
 
     public PullRequestService(ILogger<PullRequestService> logger, IAzureDevOpsService azureDevOpsService,
-        IOptions<RepositoriesConfig> repositoriesConfig, IOptions<PullRequestConfig> pullRequestModel)
+        IOptions<RepositoriesConfig> repositoriesConfig, IOptions<PullRequestConfig> pullRequestModel,
+        IOptions<WorkItemFilterConfig> workItemFilterConfig)
     {
         _logger = logger;
         _azureDevOpsService = azureDevOpsService;
         _pullRequestConfig = pullRequestModel.Value;
         _repositoriesConfig = repositoriesConfig.Value;
+        _workItemFilterConfig = workItemFilterConfig.Value;
     }
 
     /// <inheritdoc />
@@ -209,10 +212,10 @@ public sealed class PullRequestService : IPullRequestService
         };
     }
     
-    private static List<WorkItem> ProcessWorkItems(List<WorkItem> workItems)
+    private List<WorkItem> ProcessWorkItems(List<WorkItem> workItems)
     {
         // filter work items by type and area path to use only correct ones
-        var filtered = WorkItemsHelper.FilterWorkItems(workItems);
+        var filtered = WorkItemsHelper.FilterWorkItems(workItems, _workItemFilterConfig);
         
         // we need to process here all the WI to exclude duplicates and etc.
         var uniqueIds = filtered.Select(x => x.Id).Distinct().ToList();

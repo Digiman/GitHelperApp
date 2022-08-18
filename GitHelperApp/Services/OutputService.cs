@@ -109,6 +109,30 @@ public sealed class OutputService : IOutputService
         }    
     }
 
+    public void OutputWorkItemsSearchResult(List<CompareResult> compareResults, List<WorkItemSearchResult> witResults,
+        string runId, string directory, bool isPrintToConsole,
+        bool isPrintToFile)
+    {
+        var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
+
+        // 1. File with the full results
+        // 1.1. Process compare result.
+        var lines = contentGenerator.ProcessCompareResults(_repositoriesConfig, compareResults);
+
+        // 1.2. WorkItems details
+        lines.AddRange(contentGenerator.ProcessWorkItemsSearchResults(witResults));
+        
+        if (isPrintToConsole)
+        {
+            OutputHelper.OutputResultToConsole(lines);
+        }
+
+        if (isPrintToFile)
+        {
+            OutputHelper.OutputResultToFile(lines, _fileNameGenerator.CreateFilenameForFullResults(directory, runId));
+        }
+    }
+
     #region Helpers.
     
     private static string BuildDirectoryName(string commandName)
