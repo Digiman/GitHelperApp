@@ -112,7 +112,7 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
         var groups = prResults.GroupBy(x => x.RepositoryName);
         foreach (var group in groups)
         {
-            lines.Add($"* Repository name: {group.Key}. Pull Requests ({group.Count()}):");
+            lines.Add($"* Repository name: **{group.Key}**. Pull Requests ({group.Count()}):");
             lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(pr =>
                 $"    * Title: *{pr.Title}*. PullRequestId: [{pr.PullRequestId}]({pr.Url}). From: *'{pr.SourceBranch}'*. To: *'{pr.DestinationBranch}'*."));
             lines.Add(Environment.NewLine);
@@ -131,7 +131,7 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
         foreach (var group in groups)
         {
             var workItems = group.SelectMany(x => x.WorkItems);
-            lines.Add($"* Repository name: {group.Key}. Work items ({workItems.Count()}):");
+            lines.Add($"* Repository name: **{group.Key}**. Work items ({workItems.Count()}):");
             lines.AddRange(workItems.Select(wit =>
                 $"    * Title: *{wit.Title}*. State: *{wit.State}*. WorkItemId: [{wit.Id}]({wit.Url}). Area Path: *{wit.AreaPath}*. Iteration Path: *{wit.IterationPath}*."));
             lines.Add(Environment.NewLine);

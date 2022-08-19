@@ -1,18 +1,16 @@
 ﻿using GitHelperApp.Configuration;
 using GitHelperApp.Extensions;
-using GitHelperApp.Helpers;
 using GitHelperApp.Models;
 using GitHelperApp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 namespace GitHelperApp.Services;
 
 /// <summary>
 /// Simple service to work with the work items on Azure DevOps.
 /// </summary>
-public sealed class WorkItemsService : IWorkItemsService
+public sealed class WorkItemsService : BaseSharedService, IWorkItemsService
 {
     private readonly ILogger<WorkItemsService> _logger;
     private readonly IAzureDevOpsService _azureDevOpsService;
@@ -55,43 +53,30 @@ public sealed class WorkItemsService : IWorkItemsService
         var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryName, teamProject);
         
         var gitCommits = await _azureDevOpsService.GetCommitsDetailsAsync(repo, sourceBranch, destinationBranch);
-        
-        var workItems = await _azureDevOpsService.GetWorkItemsAsync(gitCommits);
 
-        workItems = ProcessWorkItems(workItems, isFilter);
-
-        var result = new WorkItemSearchResult
+        if (gitCommits.Count > 0)
         {
-            RepositoryName = repositoryName,
-            WorkItems = workItems.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList(),
-        };
+            var workItems = await _azureDevOpsService.GetWorkItemsAsync(gitCommits);
 
-        return result;
-    }
-    
-    private List<WorkItem> ProcessWorkItems(List<WorkItem> workItems, bool isFilter)
-    {
-        // filter work items by type and area path to use only correct ones
-        if (isFilter)
-        {
-            workItems = WorkItemsHelper.FilterWorkItems(workItems, _workItemFilterConfig);
-        }
+            workItems = ProcessWorkItems(workItems, _workItemFilterConfig, isFilter);
 
-        // we need to process here all the WI to exclude duplicates and etc.
-        var uniqueIds = workItems.Select(x => x.Id).Distinct().ToList();
-        var result = new List<WorkItem>(uniqueIds.Count);
-        if (uniqueIds.Count != workItems.Count)
-        {
-            foreach (var uniqueId in uniqueIds)
+            var result = new WorkItemSearchResult
             {
-                result.Add(workItems.FirstOrDefault(x => x.Id == uniqueId));
-            }
+                RepositoryName = repositoryName,
+                WorkItems = workItems
+                    .Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString())))
+                    .ToList(),
+            };
 
             return result;
         }
 
-        return workItems;
+        return new WorkItemSearchResult
+        {
+            RepositoryName = repositoryName,
+            WorkItems = Enumerable.Empty<WorkItemModel>().ToList()
+        };
     }
-
+    
     #endregion
 }

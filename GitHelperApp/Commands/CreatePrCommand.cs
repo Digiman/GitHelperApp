@@ -1,4 +1,5 @@
 ﻿using GitHelperApp.Commands.Interfaces;
+using GitHelperApp.Models;
 using GitHelperApp.Services.Interfaces;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,12 @@ public sealed class CreatePrCommand : ICustomCommand
     [Option(CommandOptionType.SingleValue, Description = "Print to file", ShortName = "pf")]
     private bool IsPrintToFile { get; }
     
+    [Option(CommandOptionType.SingleValue, Description = "Compare type (local, azure)", ShortName = "ct")]
+    private string CompareType { get; }
+    
+    [Option(CommandOptionType.SingleValue, Description = "Is apply filter or not?", ShortName = "f")]
+    private bool IsFilter { get; }
+    
     [Option(CommandOptionType.SingleValue, Description = "Dry run", ShortName = "d")]
     private bool DryRun { get; }
     
@@ -36,19 +43,19 @@ public sealed class CreatePrCommand : ICustomCommand
     {
         try
         {
-            _logger.LogInformation("Start local comparing for repositories...");
+            _logger.LogInformation("Start comparing for repositories...");
 
             var (runId, directory) = _outputService.InitializeOutputBatch("CreatePr");
 
-            // 1. Do compare for repositories and branches from configuration file locally with LibGit2Sharp
-            var results = _compareService.CompareLocal();
+            // 1. Do compare for repositories and branches from configuration file (locally with LibGit2Sharp or with Azure DevOps API)
+            var results = await DoCompareAsync();
 
             _logger.LogInformation("Compare was finished");
             
             // 2. Do processing to create the PRs
             _logger.LogInformation("Start creating PR for all repository changes...");
             
-            var prResults = await _pullRequestService.CreatePullRequestsAsync(results, DryRun);
+            var prResults = await _pullRequestService.CreatePullRequestsAsync(results, IsFilter, DryRun);
             
             _logger.LogInformation($"PR processed: {prResults.Count}");
             
@@ -63,5 +70,15 @@ public sealed class CreatePrCommand : ICustomCommand
 
             throw;
         }
+    }
+
+    private async Task<List<CompareResult>> DoCompareAsync()
+    {
+        return CompareType switch
+        {
+            "local" => _compareService.CompareLocal(),
+            "azure" => await _compareService.CompareAzureAsync(),
+            _ => _compareService.CompareLocal()
+        };
     }
 }

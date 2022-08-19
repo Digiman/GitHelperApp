@@ -82,6 +82,8 @@ public sealed class CompareService : ICompareService
             // get extended repo info - with the default values if not provided
             var repoInfo = repositoriesConfig.GetRepositoryConfig(repositoryConfig.Name);
             
+            _logger.LogInformation($"Repository: {repoInfo.Name}. Comparing: {repoInfo.SourceBranch} -> {repoInfo.DestinationBranch}");
+            
             var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repoInfo.Name, repoInfo.TeamProject);
 
             var gitCommits = await _azureDevOpsService.GetCommitsDetailsAsync(repo,

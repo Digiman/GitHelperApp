@@ -1,4 +1,5 @@
 ﻿using GitHelperApp.Commands.Interfaces;
+using GitHelperApp.Models;
 using GitHelperApp.Services.Interfaces;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,9 @@ public sealed class SearchWorkItemsCommand : ICustomCommand
     [Option(CommandOptionType.SingleValue, Description = "Is apply filter or not?", ShortName = "f")]
     private bool IsFilter { get; }
 
+    [Option(CommandOptionType.SingleValue, Description = "Compare type (local, azure)", ShortName = "ct")]
+    private string CompareType { get; }
+    
     public SearchWorkItemsCommand(ILogger<SearchWorkItemsCommand> logger, ICompareService compareService,
         IOutputService outputService, IWorkItemsService workItemsService)
     {
@@ -37,12 +41,12 @@ public sealed class SearchWorkItemsCommand : ICustomCommand
     {
         try
         {
-            _logger.LogInformation("Start local comparing for repositories...");
+            _logger.LogInformation("Start comparing for repositories...");
 
             var (runId, directory) = _outputService.InitializeOutputBatch("SearchWorkItems");
 
-            // 1. Do compare for repositories and branches from configuration file locally with LibGit2Sharp
-            var results = _compareService.CompareLocal();
+            // 1. Do compare for repositories and branches from configuration file (locally with LibGit2Sharp or with Azure DevOps API)
+            var results = await DoCompareAsync();
 
             _logger.LogInformation("Compare was finished");
             
@@ -58,9 +62,19 @@ public sealed class SearchWorkItemsCommand : ICustomCommand
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occured during searching the Work Items for the changes");
+            _logger.LogError(ex, "Error occured during searching the Work Items in repositories for changes between branches");
 
             throw;
         }
+    }
+    
+    private async Task<List<CompareResult>> DoCompareAsync()
+    {
+        return CompareType switch
+        {
+            "local" => _compareService.CompareLocal(),
+            "azure" => await _compareService.CompareAzureAsync(),
+            _ => _compareService.CompareLocal()
+        };
     }
 }
