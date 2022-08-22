@@ -1,37 +1,38 @@
 ﻿using GitHelperApp.Builders;
 using GitHelperApp.Configuration;
 using GitHelperApp.Extensions;
-using GitHelperApp.Helpers;
 using GitHelperApp.Models;
 using GitHelperApp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
-using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
 namespace GitHelperApp.Services;
 
 /// <summary>
 /// Service to work with Pull Requests.
 /// </summary>
-public sealed class PullRequestService : IPullRequestService
+public sealed class PullRequestService : BaseSharedService, IPullRequestService
 {
     private readonly ILogger<PullRequestService> _logger;
     private readonly RepositoriesConfig _repositoriesConfig;
     private readonly IAzureDevOpsService _azureDevOpsService;
     private readonly PullRequestConfig _pullRequestConfig;
+    private readonly WorkItemFilterConfig _workItemFilterConfig;
 
     public PullRequestService(ILogger<PullRequestService> logger, IAzureDevOpsService azureDevOpsService,
-        IOptions<RepositoriesConfig> repositoriesConfig, IOptions<PullRequestConfig> pullRequestModel)
+        IOptions<RepositoriesConfig> repositoriesConfig, IOptions<PullRequestConfig> pullRequestModel,
+        IOptions<WorkItemFilterConfig> workItemFilterConfig)
     {
         _logger = logger;
         _azureDevOpsService = azureDevOpsService;
         _pullRequestConfig = pullRequestModel.Value;
         _repositoriesConfig = repositoriesConfig.Value;
+        _workItemFilterConfig = workItemFilterConfig.Value;
     }
 
     /// <inheritdoc />
-    public async Task<List<PullRequestResult>> CreatePullRequestsAsync(List<CompareResult> compareResults, bool isDryRun = false)
+    public async Task<List<PullRequestResult>> CreatePullRequestsAsync(List<CompareResult> compareResults, bool isFilter, bool isDryRun = false)
     {
         var result = new List<PullRequestResult>();
         
@@ -42,7 +43,7 @@ public sealed class PullRequestService : IPullRequestService
             var repoInfo = _repositoriesConfig.GetRepositoryConfig(compareResult.RepositoryName);
             
             var prResult = await CreatePullRequestAsync(compareResult.RepositoryName, repoInfo.TeamProject,
-                repoInfo.SourceBranch, repoInfo.DestinationBranch, _pullRequestConfig, isDryRun);
+                repoInfo.SourceBranch, repoInfo.DestinationBranch, _pullRequestConfig, isFilter, isDryRun);
             
             result.Add(prResult);
         }
@@ -100,7 +101,7 @@ public sealed class PullRequestService : IPullRequestService
     #region Helpers.
     
     private async Task<PullRequestResult> CreatePullRequestAsync(string repositoryName, string teamProject, 
-        string sourceBranch, string destinationBranch, PullRequestConfig pullRequestModel, bool isDryRun = false)
+        string sourceBranch, string destinationBranch, PullRequestConfig pullRequestModel, bool isFilter, bool isDryRun = false)
     {
         var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryName, teamProject);
         var prs = await _azureDevOpsService.GetPullRequestsAsync(repo, PullRequestStatus.Active);
@@ -140,7 +141,7 @@ public sealed class PullRequestService : IPullRequestService
             {
                 var workItems = await _azureDevOpsService.GetWorkItemsAsync(gitCommits);
 
-                workItems = ProcessWorkItems(workItems);
+                workItems = ProcessWorkItems(workItems, _workItemFilterConfig, isFilter);
 
                 var builder = new GitPullRequestBuilder(prTitle, pullRequestModel.Description, sourceBranch, destinationBranch);
                 builder
@@ -207,27 +208,6 @@ public sealed class PullRequestService : IPullRequestService
             WorkItems = new List<WorkItemModel>(),
             IsNew = false
         };
-    }
-    
-    private static List<WorkItem> ProcessWorkItems(List<WorkItem> workItems)
-    {
-        // filter work items by type and area path to use only correct ones
-        var filtered = WorkItemsHelper.FilterWorkItems(workItems);
-        
-        // we need to process here all the WI to exclude duplicates and etc.
-        var uniqueIds = filtered.Select(x => x.Id).Distinct().ToList();
-        var result = new List<WorkItem>(uniqueIds.Count);
-        if (uniqueIds.Count != filtered.Count)
-        {
-            foreach (var uniqueId in uniqueIds)
-            {
-                result.Add(filtered.FirstOrDefault(x => x.Id == uniqueId));
-            }
-
-            return result;
-        }
-
-        return filtered;
     }
 
     private static GitPullRequest SearchForPrCreated(List<GitPullRequest> pullRequests, string title, string source, string destination)

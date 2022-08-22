@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.Configure<RepositoriesConfig>(configuration.GetSection(nameof(RepositoriesConfig)));
         services.Configure<AppConfig>(configuration.GetSection(nameof(AppConfig)));
         services.Configure<PullRequestConfig>(configuration.GetSection(nameof(PullRequestConfig)));
+        services.Configure<WorkItemFilterConfig>(configuration.GetSection(nameof(WorkItemFilterConfig)));
         
         // register services
         services.AddSingleton<IGitService, GitService>();
@@ -30,6 +31,7 @@ public static class DependencyInjection
         services.AddSingleton<ICompareService, CompareService>();
         services.AddSingleton<IOutputService, OutputService>();
         services.AddSingleton<IPullRequestService, PullRequestService>();
+        services.AddSingleton<IWorkItemsService, WorkItemsService>();
         
         // add content generators
         services.AddSingleton<IContentGeneratorFactory, ContentGeneratorFactory>();

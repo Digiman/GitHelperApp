@@ -7,14 +7,14 @@ using Microsoft.Extensions.Logging;
 namespace GitHelperApp.Commands;
 
 /// <summary>
-/// Command to run the process to create PRs for all repositories with changes.
+/// Command to do the compare repositories and search for work items for the difference.
 /// </summary>
-public sealed class CreatePrCommand : ICustomCommand
+public sealed class SearchWorkItemsCommand : ICustomCommand
 {
-    private readonly ILogger<CreatePrCommand> _logger;
+    private readonly ILogger<SearchWorkItemsCommand> _logger;
     private readonly ICompareService _compareService;
     private readonly IOutputService _outputService;
-    private readonly IPullRequestService _pullRequestService;
+    private readonly IWorkItemsService _workItemsService;
 
     [Option(CommandOptionType.SingleValue, Description = "Print to console", ShortName = "pc")]
     private bool IsPrintToConsole { get; }
@@ -22,21 +22,19 @@ public sealed class CreatePrCommand : ICustomCommand
     [Option(CommandOptionType.SingleValue, Description = "Print to file", ShortName = "pf")]
     private bool IsPrintToFile { get; }
     
+    [Option(CommandOptionType.SingleValue, Description = "Is apply filter or not?", ShortName = "f")]
+    private bool IsFilter { get; }
+
     [Option(CommandOptionType.SingleValue, Description = "Compare type (local, azure)", ShortName = "ct")]
     private string CompareType { get; }
     
-    [Option(CommandOptionType.SingleValue, Description = "Is apply filter or not?", ShortName = "f")]
-    private bool IsFilter { get; }
-    
-    [Option(CommandOptionType.SingleValue, Description = "Dry run", ShortName = "d")]
-    private bool DryRun { get; }
-    
-    public CreatePrCommand(ILogger<CreatePrCommand> logger, ICompareService compareService, IOutputService outputService, IPullRequestService pullRequestService)
+    public SearchWorkItemsCommand(ILogger<SearchWorkItemsCommand> logger, ICompareService compareService,
+        IOutputService outputService, IWorkItemsService workItemsService)
     {
         _logger = logger;
         _compareService = compareService;
         _outputService = outputService;
-        _pullRequestService = pullRequestService;
+        _workItemsService = workItemsService;
     }
 
     public async Task OnExecuteAsync(CommandLineApplication command, IConsole console)
@@ -45,7 +43,7 @@ public sealed class CreatePrCommand : ICustomCommand
         {
             _logger.LogInformation("Start comparing for repositories...");
 
-            var (runId, directory) = _outputService.InitializeOutputBatch("CreatePr");
+            var (runId, directory) = _outputService.InitializeOutputBatch("SearchWorkItems");
 
             // 1. Do compare for repositories and branches from configuration file (locally with LibGit2Sharp or with Azure DevOps API)
             var results = await DoCompareAsync();
@@ -53,25 +51,23 @@ public sealed class CreatePrCommand : ICustomCommand
             _logger.LogInformation("Compare was finished");
             
             // 2. Do processing to create the PRs
-            _logger.LogInformation("Start creating PR for all repository changes...");
+            _logger.LogInformation("Start searching the work items for changes...");
             
-            var prResults = await _pullRequestService.CreatePullRequestsAsync(results, IsFilter, DryRun);
-            
-            _logger.LogInformation($"PR processed: {prResults.Count}");
+            var witResults = await _workItemsService.SearchWorkItemsAsync(results, IsFilter);
             
             // 3. Process the results - output
-            _logger.LogInformation("Output compare results...");
+            _logger.LogInformation("Output work items search results...");
             
-            _outputService.OutputFullResult(results, prResults, runId, directory, IsPrintToConsole, IsPrintToFile);
+            _outputService.OutputWorkItemsSearchResult(results, witResults, runId, directory, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occured during processing the repositories and creating PRs (compare and create PR on Azure DevOps)");
+            _logger.LogError(ex, "Error occured during searching the Work Items in repositories for changes between branches");
 
             throw;
         }
     }
-
+    
     private async Task<List<CompareResult>> DoCompareAsync()
     {
         return CompareType switch

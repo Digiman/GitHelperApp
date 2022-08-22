@@ -10,7 +10,12 @@ public static class WorkItemExtensions
         return new WorkItemModel
         {
             Id = workItem.Id.ToString(),
-            Url = url
+            Url = url,
+            Title = workItem.Fields["System.Title"].ToString(),
+            Type = workItem.Fields["System.WorkItemType"].ToString(),
+            AreaPath = workItem.Fields["System.AreaPath"].ToString(),
+            IterationPath = workItem.Fields["System.IterationPath"].ToString(),
+            State = workItem.Fields["System.State"].ToString()
         };
     }
 }
