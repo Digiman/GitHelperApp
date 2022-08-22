@@ -10,7 +10,8 @@ public sealed class ContentGeneratorFactory : IContentGeneratorFactory
     private readonly Dictionary<string, Type> _generators = new Dictionary<string, Type>
     {
         { "text", typeof(TextFileContentGenerator) },
-        { "markdown", typeof(MarkdownContentGenerator) }
+        { "markdown", typeof(MarkdownContentGenerator) },
+        { "markdown-table", typeof(MarkdownTableContentGenerator) }
     };
 
     public ContentGeneratorFactory(IServiceProvider serviceProvider)

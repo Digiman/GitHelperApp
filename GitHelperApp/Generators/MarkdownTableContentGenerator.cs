@@ -8,7 +8,7 @@ namespace GitHelperApp.Generators;
 /// <summary>
 /// Generator to create the lines with string in Markdown format to print the results.
 /// </summary>
-public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGenerator
+public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IContentGenerator
 {
     public List<string> ProcessCompareResults(RepositoriesConfig repositoriesConfig, IReadOnlyCollection<CompareResult> results)
     {
@@ -56,8 +56,14 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
             lines.Add($"**{index}: {pullRequestResult.RepositoryName}:**");
             lines.Add($"PR was created with Id [{pullRequestResult.PullRequestId}]({pullRequestResult.Url}). Work items count: {pullRequestResult.WorkItems.Count}.");
             lines.Add("Work items:");
-            lines.AddRange(pullRequestResult.WorkItems.Select(workItemModel => $"* Work Item Id: [{workItemModel.Id}]({workItemModel.Url})"));
-            
+            lines.AddRange(pullRequestResult.WorkItems
+                .Select(x => new
+                {
+                    x.Id,
+                    Url = $"[{x.Id}]({x.Url})"
+                })
+                .ToMarkdownTable(new[] { "Work Item Id", "Url" }));
+
             lines.Add(Environment.NewLine);
             index++;
         }
@@ -77,7 +83,13 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
         var workItems = ProcessUniqueWorkItems(prResults);
 
         lines.Add($"**Work items summary ({workItems.Count}):**");
-        lines.AddRange(workItems.Select(workItemModel => $"* Work Item Id: [{workItemModel.Id}]({workItemModel.Url})"));
+        lines.AddRange(workItems
+            .Select(x => new
+            {
+                x.Id,
+                Url = $"[{x.Id}]({x.Url})"
+            })
+            .ToMarkdownTable(new[] { "Work Item Id", "Url" }));
 
         return lines;
     }
@@ -87,7 +99,12 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
         var lines = new List<string>();
         lines.Add($"**Pull Requests summary:**");
         lines.AddRange(prResults.Where(x => x.PullRequestId != 0)
-            .Select(pr => $"* PullRequestId: [{pr.PullRequestId}]({pr.Url})"));
+            .Select(x => new
+            {
+                x.PullRequestId, 
+                Url = $"[{x.PullRequestId}]({x.Url})"
+            })
+            .ToMarkdownTable(new []{ "PR Id", "Url" }));
 
         return lines;
     }
@@ -143,7 +160,20 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
 
     public List<string> ProcessSummaryTableResult(List<ReleaseSummaryModel> aggregatedResult)
     {
-        // TODO: no need to add the logic here because simple markdown file is not supported the tables
-        return new List<string>();
+        var lines = new List<string>();
+
+        lines.Add(Environment.NewLine);
+
+        lines.AddRange(aggregatedResult
+            .Select(x => new
+            {
+                x.Index,
+                Reposiory = $"[{x.RepositoryName}]({x.RepositoryUrl})",
+                Build = $"[Pipeline]({x.PipelineUrl})",
+                PullRequest = $"[PR {x.PullRequestId}]({x.PullRequestUrl})"
+            })
+            .ToMarkdownTable(new[] { "#", "Repository", "Build Pipeline", "PR" }));        
+        
+        return lines;
     }
 }
