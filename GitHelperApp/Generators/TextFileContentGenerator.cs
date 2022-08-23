@@ -138,4 +138,10 @@ public sealed class TextFileContentGenerator : BaseContentGenerator, IContentGen
 
         return lines;
     }
+
+    public List<string> ProcessSummaryTableResult(List<ReleaseSummaryModel> aggregatedResult)
+    {
+        // TODO: no need to add the logic here because text file is not supported the tables
+        return new List<string>();
+    }
 }

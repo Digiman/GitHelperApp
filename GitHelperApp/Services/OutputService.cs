@@ -16,16 +16,18 @@ public sealed class OutputService : IOutputService
     private readonly ILogger<OutputService> _logger;
     private readonly IContentGeneratorFactory _contentGeneratorFactory;
     private readonly IFileNameGenerator _fileNameGenerator;
+    private readonly IAzureDevOpsService _azureDevOpsService;
     private readonly RepositoriesConfig _repositoriesConfig;
     private readonly AppConfig _appConfig;
 
     public OutputService(ILogger<OutputService> logger, IContentGeneratorFactory contentGeneratorFactory,
         IFileNameGenerator fileNameGenerator, IOptions<RepositoriesConfig> repositoriesConfig,
-        IOptions<AppConfig> appConfig)
+        IOptions<AppConfig> appConfig, IAzureDevOpsService azureDevOpsService)
     {
         _logger = logger;
         _contentGeneratorFactory = contentGeneratorFactory;
         _fileNameGenerator = fileNameGenerator;
+        _azureDevOpsService = azureDevOpsService;
         _repositoriesConfig = repositoriesConfig.Value;
         _appConfig = appConfig.Value;
     }
@@ -79,6 +81,13 @@ public sealed class OutputService : IOutputService
 
         // 1. 2. Process PR result.
         lines.AddRange(contentGenerator.ProcessPrResults(prResults));
+        
+        // build aggregates result
+        if (_appConfig.OutputFormat == "markdown-table")
+        {
+            var aggregatedResult = BuildSummaryTableModel(compareResults, prResults);
+            lines.AddRange(contentGenerator.ProcessSummaryTableResult(aggregatedResult));
+        }
         
         if (isPrintToConsole)
         {
@@ -186,6 +195,40 @@ public sealed class OutputService : IOutputService
         {
             OutputHelper.OutputResultToFile(lines, _fileNameGenerator.CreateFileNameForPrIds(directory, runId));
         }
+    }
+    
+    private List<ReleaseSummaryModel> BuildSummaryTableModel(List<CompareResult> compareResults, List<PullRequestResult> prResults)
+    {
+        var result = new List<ReleaseSummaryModel>(_repositoriesConfig.Repositories.Count);
+
+        var index = 1;
+        foreach (var repository in _repositoriesConfig.Repositories)
+        {
+            var prDetails = prResults.FirstOrDefault(x => x.RepositoryName == repository.Name);
+            if (prDetails == null)
+            {
+                prDetails = new PullRequestResult
+                {
+                    PullRequestId = 0,
+                    Url = string.Empty
+                };
+            }
+            
+            var model = new ReleaseSummaryModel
+            {
+                Index = index,
+                RepositoryName = repository.Name,
+                RepositoryUrl = _azureDevOpsService.BuildRepositoryUrl(repository.TeamProject, repository.Name),
+                PullRequestId = prDetails.PullRequestId,
+                PullRequestUrl = prDetails.Url,
+                PipelineUrl = _azureDevOpsService.BuildPipelineUrl(repository.TeamProject, repository.PipelineId)
+            };
+            result.Add(model);
+            
+            index++;
+        }
+        
+        return result;
     }
 
     #endregion

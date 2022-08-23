@@ -174,12 +174,22 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     
     public string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId)
     {
-        return $"{_config.CollectionUrl}/{teamProject}/_git/{repositoryName}/pullrequest/{pullRequestId}";
+        return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_git/{Uri.EscapeDataString(repositoryName)}/pullrequest/{pullRequestId}";
     }
     
     public string BuildWorkItemUrl(string teamProject, string workItemId)
     {
-        return $"{_config.CollectionUrl}/{teamProject}/_workitems/edit/{workItemId}";
+        return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_workitems/edit/{workItemId}";
+    }
+    
+    public string BuildRepositoryUrl(string teamProject, string name)
+    {
+        return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_git/{Uri.EscapeDataString(name)}";
+    }
+    
+    public string BuildPipelineUrl(string teamProject, int pipelineId)
+    {
+        return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_build?definitionId={pipelineId}";
     }
 
     private static string GetRefName(string branchName) => $"refs/heads/{branchName}";

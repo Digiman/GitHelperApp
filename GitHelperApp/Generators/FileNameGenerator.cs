@@ -34,6 +34,7 @@ public sealed class FileNameGenerator : IFileNameGenerator
         {
             "text" => "txt",
             "markdown" => "md",
+            "markdown-table" => "md",
             _ => "txt"
         };
     }
