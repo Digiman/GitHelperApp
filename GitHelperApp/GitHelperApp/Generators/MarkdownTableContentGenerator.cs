@@ -54,15 +54,15 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         foreach (var pullRequestResult in prResults)
         {
             lines.Add($"**{index}: {pullRequestResult.RepositoryName}:**");
-            lines.Add($"PR was created with Id [{pullRequestResult.PullRequestId}]({pullRequestResult.Url}). Work items count: {pullRequestResult.WorkItems.Count}.");
+            lines.Add($"PR was created with Id [{pullRequestResult.PullRequestId}]({pullRequestResult.Url}). Title: **{pullRequestResult.Title}**. Work items count: {pullRequestResult.WorkItems.Count}.");
             lines.Add("Work items:");
             lines.AddRange(pullRequestResult.WorkItems
                 .Select(x => new
                 {
-                    x.Id,
+                    x.Title,
                     Url = $"[{x.Id}]({x.Url})"
                 })
-                .ToMarkdownTable(new[] { "Work Item Id", "Url" }));
+                .ToMarkdownTable(new[] { "Title", "Id and Url" }));
 
             lines.Add(Environment.NewLine);
             index++;
@@ -86,10 +86,10 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         lines.AddRange(workItems
             .Select(x => new
             {
-                x.Id,
+                x.Title,
                 Url = $"[{x.Id}]({x.Url})"
             })
-            .ToMarkdownTable(new[] { "Work Item Id", "Url" }));
+            .ToMarkdownTable(new[] { "Title", "Id and Url" }));
 
         return lines;
     }
@@ -101,10 +101,10 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         lines.AddRange(prResults.Where(x => x.PullRequestId != 0)
             .Select(x => new
             {
-                x.PullRequestId, 
+                x.Title, 
                 Url = $"[{x.PullRequestId}]({x.Url})"
             })
-            .ToMarkdownTable(new []{ "PR Id", "Url" }));
+            .ToMarkdownTable(new []{ "Title", "Id and Url" }));
 
         return lines;
     }
@@ -117,7 +117,13 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         var workItems = ProcessUniqueWorkItems(prResults);
 
         lines.Add($"**Work items summary ({workItems.Count}):**");
-        lines.AddRange(workItems.Select(workItemModel => $"* Work Item Id: [{workItemModel.Id}]({workItemModel.Url})"));
+        lines.AddRange(workItems
+            .Select(x => new
+            {
+                x.Title,
+                Url = $"[{x.Id}]({x.Url})"
+            })
+            .ToMarkdownTable(new[] { "Title", "Id and Url" }));
 
         return lines;
     }
@@ -130,9 +136,16 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         var groups = prResults.GroupBy(x => x.RepositoryName);
         foreach (var group in groups)
         {
-            lines.Add($"* Repository name: **{group.Key}**. Pull Requests ({group.Count()}):");
-            lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(pr =>
-                $"    * Title: *{pr.Title}*. PullRequestId: [{pr.PullRequestId}]({pr.Url}). From: *'{pr.SourceBranch}'*. To: *'{pr.DestinationBranch}'*."));
+            lines.Add($"Repository name: **{group.Key}**. Pull Requests ({group.Count()}):");
+            lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(x => new
+                {
+                    x.Title,
+                    Url = $"[{x.PullRequestId}]({x.Url})",
+                    From = x.SourceBranch,
+                    To = x.DestinationBranch
+                })
+                .ToMarkdownTable(new[] { "Title", "Id and Url", "From", "To" }));
+            
             lines.Add(Environment.NewLine);
         }
 
@@ -149,9 +162,17 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         foreach (var group in groups)
         {
             var workItems = group.SelectMany(x => x.WorkItems);
-            lines.Add($"* Repository name: **{group.Key}**. Work items ({workItems.Count()}):");
-            lines.AddRange(workItems.Select(wit =>
-                $"    * Title: *{wit.Title}*. State: *{wit.State}*. WorkItemId: [{wit.Id}]({wit.Url}). Area Path: *{wit.AreaPath}*. Iteration Path: *{wit.IterationPath}*."));
+            lines.Add($"Repository name: **{group.Key}**. Work items ({workItems.Count()}):");
+            lines.AddRange(workItems.Select(x => new
+                {
+                    x.Title,
+                    x.State,
+                    x.AreaPath,
+                    x.IterationPath,
+                    Url = $"[{x.Id}]({x.Url})"
+                })
+                .ToMarkdownTable(new[] { "Title", "State", "Area Path", "Iteration Path", "Id and Url" }));
+            
             lines.Add(Environment.NewLine);
         }
 

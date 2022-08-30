@@ -1,6 +1,5 @@
 ﻿using GitHelperApp.Configuration;
 using GitHelperApp.Generators.Interfaces;
-using GitHelperApp.Generators.Markdown;
 using GitHelperApp.Models;
 
 namespace GitHelperApp.Generators;

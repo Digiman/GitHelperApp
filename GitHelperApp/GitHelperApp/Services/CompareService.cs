@@ -90,6 +90,12 @@ public sealed class CompareService : ICompareService
                 repoInfo.SourceBranch, repoInfo.DestinationBranch);
 
             // TODO: need to improve here the logic to calculate the changes count - maybe need to make more calls to get proper details
+
+            var commitDiffs = await _azureDevOpsService.GetCommitsDiffsAsync(repo, repoInfo.TeamProject, repoInfo.SourceBranch,
+                repoInfo.DestinationBranch);
+
+            // var changesCount = gitCommits.Select(x => x.ChangeCounts).Sum(x => x.Count); // old logic to calculate the changes that works wrong!(
+            var changesCount = commitDiffs.BehindCount ?? 0; // better but locally it works correct not as here(
             
             result.Add(new CompareResult
             {
@@ -97,7 +103,7 @@ public sealed class CompareService : ICompareService
                 DestinationBranch = repoInfo.DestinationBranch,
                 RepositoryName = repoInfo.Name,
                 Commits = gitCommits.Select(x => x.CommitId).ToList(),
-                ChangesCount = gitCommits.Select(x => x.ChangeCounts).Sum(x => x.Count)
+                ChangesCount = changesCount
             });
         }
 

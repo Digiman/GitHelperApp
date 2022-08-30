@@ -133,7 +133,8 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                         RepositoryName = repositoryName,
                         Url = _azureDevOpsService.BuildPullRequestUrl(teamProject, repositoryName, completedPr.PullRequestId),
                         WorkItems = workItemsForCompletedPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id))).ToList(),
-                        IsNew = false
+                        IsNew = false,
+                        Title = completedPr.Title
                     };
                 }
             }
@@ -165,7 +166,8 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                         RepositoryName = repositoryName,
                         Url = string.Empty,
                         WorkItems = workItems.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList(),
-                        IsNew = true
+                        IsNew = true,
+                        Title = "EMPTY PULL REQUEST - DRY MODE"
                     };
                 }
 
@@ -179,7 +181,8 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                     RepositoryName = repositoryName,
                     Url = _azureDevOpsService.BuildPullRequestUrl(teamProject, repositoryName, prCreated.PullRequestId),
                     WorkItems = workItems.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList(),
-                    IsNew = true
+                    IsNew = true,
+                    Title = prCreated.Title
                 };
             }
         }
@@ -195,7 +198,8 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                 RepositoryName = repositoryName,
                 Url = _azureDevOpsService.BuildPullRequestUrl(teamProject, repositoryName, actualPr.PullRequestId),
                 WorkItems = workItemsForActualPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id))).ToList(),
-                IsNew = false
+                IsNew = false,
+                Title = actualPr.Title
             };
         }
 
@@ -206,7 +210,8 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
             RepositoryName = repositoryName,
             Url = string.Empty,
             WorkItems = new List<WorkItemModel>(),
-            IsNew = false
+            IsNew = false,
+            Title = "EMPTY PULL REQUEST"
         };
     }
 

@@ -5,7 +5,6 @@ namespace GitHelperApp.Models;
 /// </summary>
 public sealed class PullRequestSearchResult : PullRequestResult
 {
-    public string Title { get; set; }
     public string Description { get; set; }
     public string SourceBranch { get; set; }
     public string DestinationBranch { get; set; }

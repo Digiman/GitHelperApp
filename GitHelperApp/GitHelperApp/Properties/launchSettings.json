@@ -18,7 +18,7 @@
       "commandName": "Project",
       "commandLineArgs": "compare-azure -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "MD"
+        "GHA_ENVIRONMENT": "DR"
       }
     },
     "GitHelperApp-CreatePr-DryRun": {
@@ -30,9 +30,9 @@
     },
     "GitHelperApp-CreatePr-Azure-DryRun": {
       "commandName": "Project",
-      "commandLineArgs": "create-pr -pf true -ct azure -d true",
+      "commandLineArgs": "create-pr -pf true -ct azure -d true -f true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "MD"
+        "GHA_ENVIRONMENT": "DR"
       }
     },
     "GitHelperApp-CreatePr": {
@@ -60,7 +60,7 @@
       "commandName": "Project",
       "commandLineArgs": "search-work-items -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "MD"
+        "GHA_ENVIRONMENT": "DR"
       }
     },
     "GitHelperApp-SearchWorkItems-Azure": {

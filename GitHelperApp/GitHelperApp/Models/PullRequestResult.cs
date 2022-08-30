@@ -7,4 +7,5 @@ public class PullRequestResult
     public string Url { get; set; }
     public List<WorkItemModel> WorkItems { get; set; }
     public bool IsNew { get; set; }
+    public string Title { get; set; }
 }
