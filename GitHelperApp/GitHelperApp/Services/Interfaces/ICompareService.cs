@@ -7,6 +7,15 @@ namespace GitHelperApp.Services.Interfaces;
 /// </summary>
 public interface ICompareService
 {
+    /// <summary>
+    /// Compare the branches locally for all th repositories from config.
+    /// </summary>
+    /// <returns>Returns the compare result.</returns>
     List<CompareResult> CompareLocal();
-    Task<List<CompareResult> > CompareAzureAsync();
+
+    /// <summary>
+    /// Compare the branches on Azure DevOps with API for all th repositories from config.
+    /// </summary>
+    /// <returns>Returns the compare result.</returns>
+    Task<List<CompareResult>> CompareAzureAsync();
 }

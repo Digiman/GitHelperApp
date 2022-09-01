@@ -14,13 +14,14 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
     {
         var lines = new List<string>();
 
+        lines.Add("# Repositories details");
         lines.Add($"**Repositories count: {repositoriesConfig.Repositories.Count}**");
 
         lines.Add(Environment.NewLine);
 
         // no changes
         var noChanges = results.Where(x => x.ChangesCount == 0).OrderBy(x => x.RepositoryName).ToList();
-        lines.Add($"**Repositories without changes ({noChanges.Count}):**");
+        lines.Add($"## Repositories without changes ({noChanges.Count}):");
         var index = 1;
         foreach (var compareResult in noChanges)
         {
@@ -33,7 +34,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         // with any changes
         index = 1;
         var withChanges = results.Where(x => x.ChangesCount > 0).OrderBy(x => x.RepositoryName).ToList();
-        lines.Add($"**Repositories with changes ({withChanges.Count}):**");
+        lines.Add($"## Repositories with changes ({withChanges.Count}):");
         foreach (var compareResult in withChanges)
         {
             lines.Add($"{index}. Repository: *'{compareResult.RepositoryName}'*. There are changes between **'{compareResult.SourceBranch}'** and **'{compareResult.DestinationBranch}'**. Changes count = {compareResult.ChangesCount}. Commits count: {compareResult.Commits.Count}.");
@@ -49,20 +50,25 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
     {
         var lines = new List<string>();
 
+        lines.Add("# Pull Request details");
+        
         // 1. Details for each PR.
         var index = 1;
         foreach (var pullRequestResult in prResults)
         {
-            lines.Add($"**{index}: {pullRequestResult.RepositoryName}:**");
+            lines.Add($"## {index} {pullRequestResult.RepositoryName}:");
             lines.Add($"PR was created with Id [{pullRequestResult.PullRequestId}]({pullRequestResult.Url}). Title: **{pullRequestResult.Title}**. Work items count: {pullRequestResult.WorkItems.Count}.");
             lines.Add("Work items:");
             lines.AddRange(pullRequestResult.WorkItems
+                .OrderBy(x => x.Type)
+                .ThenBy(x => x.Id)
                 .Select(x => new
                 {
+                    Url = $"[{x.Id}]({x.Url})",
                     x.Title,
-                    Url = $"[{x.Id}]({x.Url})"
+                    x.Type
                 })
-                .ToMarkdownTable(new[] { "Title", "Id and Url" }));
+                .ToMarkdownTable(new[] { "Id", "Title", "Type" }));
 
             lines.Add(Environment.NewLine);
             index++;
@@ -73,8 +79,10 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         // 2. PR summary
         if (prResults.Any(x => x.PullRequestId != 0))
         {
-            lines.Add($"**Pull Requests summary:**");
-            lines.AddRange(prResults.Where(x => x.PullRequestId != 0).Select(pr => $"* [{pr.PullRequestId}]({pr.Url})"));
+            lines.Add($"# Pull Requests summary");
+            lines.AddRange(prResults.Where(x => x.PullRequestId != 0)
+                .OrderBy(x => x.PullRequestId)
+                .Select(pr => $"* [{pr.PullRequestId}]({pr.Url})"));
 
             lines.Add(Environment.NewLine);
         }
@@ -82,14 +90,17 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         // 3. Process the list of Work Items to have unique list at the end of log file
         var workItems = ProcessUniqueWorkItems(prResults);
 
-        lines.Add($"**Work items summary ({workItems.Count}):**");
+        lines.Add($"# Work items summary ({workItems.Count})");
         lines.AddRange(workItems
+            .OrderBy(x => x.Type)
+            .ThenBy(x => x.Id)
             .Select(x => new
             {
+                Url = $"[{x.Id}]({x.Url})",
                 x.Title,
-                Url = $"[{x.Id}]({x.Url})"
+                x.Type,
             })
-            .ToMarkdownTable(new[] { "Title", "Id and Url" }));
+            .ToMarkdownTable(new[] { "Id", "Title", "Type" }));
 
         return lines;
     }
@@ -99,12 +110,13 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         var lines = new List<string>();
         lines.Add($"**Pull Requests summary:**");
         lines.AddRange(prResults.Where(x => x.PullRequestId != 0)
+            .OrderBy(x => x.PullRequestId)
             .Select(x => new
             {
-                x.Title, 
-                Url = $"[{x.PullRequestId}]({x.Url})"
+                Url = $"[{x.PullRequestId}]({x.Url})",
+                x.Title
             })
-            .ToMarkdownTable(new []{ "Title", "Id and Url" }));
+            .ToMarkdownTable(new[] { "Id", "Title" }));
 
         return lines;
     }
@@ -118,12 +130,15 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
 
         lines.Add($"**Work items summary ({workItems.Count}):**");
         lines.AddRange(workItems
+            .OrderBy(x => x.Type)
+            .ThenBy(x => x.Id)
             .Select(x => new
             {
+                Url = $"[{x.Id}]({x.Url})",
                 x.Title,
-                Url = $"[{x.Id}]({x.Url})"
+                x.Type,
             })
-            .ToMarkdownTable(new[] { "Title", "Id and Url" }));
+            .ToMarkdownTable(new[] { "Id", "Title", "Type" }));
 
         return lines;
     }
@@ -137,14 +152,16 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         foreach (var group in groups)
         {
             lines.Add($"Repository name: **{group.Key}**. Pull Requests ({group.Count()}):");
-            lines.AddRange(group.Where(x => x.PullRequestId != 0).Select(x => new
+            lines.AddRange(group.Where(x => x.PullRequestId != 0)
+                .OrderBy(x => x.PullRequestId)
+                .Select(x => new
                 {
-                    x.Title,
                     Url = $"[{x.PullRequestId}]({x.Url})",
+                    x.Title,
                     From = x.SourceBranch,
                     To = x.DestinationBranch
                 })
-                .ToMarkdownTable(new[] { "Title", "Id and Url", "From", "To" }));
+                .ToMarkdownTable(new[] { "Id", "Title", "From", "To" }));
             
             lines.Add(Environment.NewLine);
         }
@@ -163,16 +180,19 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         {
             var workItems = group.SelectMany(x => x.WorkItems);
             lines.Add($"Repository name: **{group.Key}**. Work items ({workItems.Count()}):");
-            lines.AddRange(workItems.Select(x => new
+            lines.AddRange(workItems
+                .OrderBy(x => x.Type)
+                .ThenBy(x => x.Id).Select(x => new
                 {
+                    Url = $"[{x.Id}]({x.Url})",
                     x.Title,
+                    x.Type,
                     x.State,
                     x.AreaPath,
                     x.IterationPath,
-                    Url = $"[{x.Id}]({x.Url})"
                 })
-                .ToMarkdownTable(new[] { "Title", "State", "Area Path", "Iteration Path", "Id and Url" }));
-            
+                .ToMarkdownTable(new[] { "Id", "Title", "Type", "State", "Area Path", "Iteration Path" }));
+
             lines.Add(Environment.NewLine);
         }
 
@@ -185,16 +205,19 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
 
         lines.Add(Environment.NewLine);
 
+        lines.Add("# Summary (fore release page)");
+        
         lines.AddRange(aggregatedResult
             .Select(x => new
             {
                 x.Index,
                 Reposiory = $"[{x.RepositoryName}]({x.RepositoryUrl})",
                 Build = $"[Pipeline]({x.PipelineUrl})",
-                PullRequest = $"[PR {x.PullRequestId}]({x.PullRequestUrl})"
+                PullRequest = x.PullRequestId == 0 ? "PR" : $"[PR {x.PullRequestId}]({x.PullRequestUrl})",
+                x.WorkItemsCount
             })
-            .ToMarkdownTable(new[] { "#", "Repository", "Build Pipeline", "PR" }));        
-        
+            .ToMarkdownTable(new[] { "#", "Repository", "Build Pipeline", "PR", "Work Items Count" }));
+
         return lines;
     }
 }

@@ -10,7 +10,14 @@ public sealed class RepositoriesConfig
     /// </summary>
     public List<RepositoryConfig> Repositories { get; set; }
 
+    /// <summary>
+    /// Default branch to use as source - will be applied for all repo or can be overriden.
+    /// </summary>
     public string DefaultSourceBranch { get; set; }
+    
+    /// <summary>
+    /// Default branch to use as destination - will be applied for all repo or can be overriden.
+    /// </summary>
     public string DefaultDestinationBranch { get; set; }
 
     /// <summary>

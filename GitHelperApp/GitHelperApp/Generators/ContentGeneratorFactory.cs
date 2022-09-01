@@ -3,6 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GitHelperApp.Generators;
 
+/// <summary>
+/// Simple factory to create the required content generator based on the type.
+/// </summary>
 public sealed class ContentGeneratorFactory : IContentGeneratorFactory
 {
     private readonly IServiceProvider _serviceProvider;
@@ -19,6 +22,7 @@ public sealed class ContentGeneratorFactory : IContentGeneratorFactory
         _serviceProvider = serviceProvider;
     }
 
+    /// <inheritdoc />
     public IContentGenerator GetContentGenerator(string type)
     {
         var generatorType = _generators[type];

@@ -2,7 +2,12 @@
 
 namespace GitHelperApp.Generators.Markdown;
 
-// Fork of https://raw.githubusercontent.com/jpierson/to-markdown-table/develop/src/ToMarkdownTable/LinqMarkdownTableExtensions.cs
+/// <summary>
+/// Extension to generate the table in Markdown.
+/// </summary>
+/// <remarks>
+/// This is Fork of https://raw.githubusercontent.com/jpierson/to-markdown-table/develop/src/ToMarkdownTable/LinqMarkdownTableExtensions.cs
+/// </remarks>
 public static class LinqMarkdownTableExtensions
 {
     public static IEnumerable<string> ToMarkdownTable<T>(this IEnumerable<T> source, IEnumerable<string> columnNames = null)

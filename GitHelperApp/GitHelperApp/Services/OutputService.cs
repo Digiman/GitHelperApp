@@ -213,7 +213,7 @@ public sealed class OutputService : IOutputService
                     Url = string.Empty
                 };
             }
-            
+
             var model = new ReleaseSummaryModel
             {
                 Index = index,
@@ -221,7 +221,8 @@ public sealed class OutputService : IOutputService
                 RepositoryUrl = _azureDevOpsService.BuildRepositoryUrl(repository.TeamProject, repository.Name),
                 PullRequestId = prDetails.PullRequestId,
                 PullRequestUrl = prDetails.Url,
-                PipelineUrl = _azureDevOpsService.BuildPipelineUrl(repository.TeamProject, repository.PipelineId)
+                PipelineUrl = _azureDevOpsService.BuildPipelineUrl(repository.TeamProject, repository.PipelineId),
+                WorkItemsCount = prDetails.WorkItems?.Count ?? 0
             };
             result.Add(model);
             

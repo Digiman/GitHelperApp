@@ -27,6 +27,7 @@ public sealed class CompareService : ICompareService
         _repositoriesConfig = repositoriesConfig.Value;
     }
 
+    /// <inheritdoc />
     public List<CompareResult> CompareLocal()
     {
         var compareResults = CompareBranchesLocal(_repositoriesConfig);
@@ -34,6 +35,7 @@ public sealed class CompareService : ICompareService
         return compareResults;
     }
 
+    /// <inheritdoc />
     public async Task<List<CompareResult>> CompareAzureAsync()
     {
         var compareResult = await CompareBranchesAzureAsync(_repositoriesConfig);
@@ -43,6 +45,11 @@ public sealed class CompareService : ICompareService
     
     #region Helper functions with the main logic.
 
+    /// <summary>
+    /// Run local branches compare for all repositories from config.
+    /// </summary>
+    /// <param name="repositoriesConfig">Configuration for repositories to compare.</param>
+    /// <returns>Returns the compare result.</returns>
     private List<CompareResult> CompareBranchesLocal(RepositoriesConfig repositoriesConfig)
     {
         var result = new List<CompareResult>(repositoriesConfig.Repositories.Count);
@@ -58,8 +65,8 @@ public sealed class CompareService : ICompareService
             _logger.LogInformation($"Repository: {repoInfo.Name}. Comparing: {repoInfo.SourceBranch} -> {repoInfo.DestinationBranch}");
             
             var (isChanges, count, commits) = _gitService.CompareBranches(repositoryConfig.Path,
-                GitLocalHelper.GetRefName(repoInfo.SourceBranch),
-                GitLocalHelper.GetRefName(repoInfo.DestinationBranch));
+                GitBranchHelper.GetRefName(repoInfo.SourceBranch),
+                GitBranchHelper.GetRefName(repoInfo.DestinationBranch));
 
             result.Add(new CompareResult
             {
@@ -74,6 +81,11 @@ public sealed class CompareService : ICompareService
         return result;
     }
 
+    /// <summary>
+    /// Run branches compare for all repositories from config with Azure DevOps API to use internal functionality.
+    /// </summary>
+    /// <param name="repositoriesConfig">Configuration for repositories to compare.</param>
+    /// <returns>Returns the compare result.</returns>
     private async Task<List<CompareResult>> CompareBranchesAzureAsync(RepositoriesConfig repositoriesConfig)
     {
         var result = new List<CompareResult>(repositoriesConfig.Repositories.Count);

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace GitHelperApp.Services;
 
 /// <summary>
-/// Simple service to work with the work items on Azure DevOps.
+/// Service to work with the work items on Azure DevOps.
 /// </summary>
 public sealed class WorkItemsService : BaseSharedService, IWorkItemsService
 {
@@ -26,6 +26,7 @@ public sealed class WorkItemsService : BaseSharedService, IWorkItemsService
         _workItemFilterConfig = workItemFilterConfig.Value;
     }
 
+    /// <inheritdoc />
     public async Task<List<WorkItemSearchResult>> SearchWorkItemsAsync(List<CompareResult> compareResults, bool isFilter = false)
     {
         var result = new List<WorkItemSearchResult>();

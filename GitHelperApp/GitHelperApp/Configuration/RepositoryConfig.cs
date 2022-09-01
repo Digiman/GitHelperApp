@@ -5,6 +5,9 @@ namespace GitHelperApp.Configuration;
 /// </summary>
 public sealed class RepositoryConfig
 {
+    /// <summary>
+    /// Name of teh repository. Uses to search in Azure DevOps and all other identifications.
+    /// </summary>
     public string Name { get; init; }
 
     /// <summary>
@@ -12,7 +15,14 @@ public sealed class RepositoryConfig
     /// </summary>
     public string Path { get; init; }
 
+    /// <summary>
+    /// Source branch - to override the default.
+    /// </summary>
     public string SourceBranch { get; set; }
+    
+    /// <summary>
+    /// Destination branch - to override the default
+    /// </summary>
     public string DestinationBranch { get; set; }
 
     /// <summary>
@@ -20,5 +30,8 @@ public sealed class RepositoryConfig
     /// </summary>
     public string TeamProject { get; set; }
     
-    public int PipelineId { get; set; }
+    /// <summary>
+    /// Id of the build pipeline used to build and deploy applications from repository.
+    /// </summary>
+    public int PipelineId { get; init; }
 }

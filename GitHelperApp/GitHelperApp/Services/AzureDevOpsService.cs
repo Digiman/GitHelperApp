@@ -1,4 +1,5 @@
 ﻿using GitHelperApp.Configuration;
+using GitHelperApp.Helpers;
 using GitHelperApp.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.TeamFoundation.Core.WebApi;
@@ -101,12 +102,12 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
 
         if (!string.IsNullOrEmpty(destination))
         {
-            criteria.TargetRefName = GetRefName(destination);
+            criteria.TargetRefName = GitBranchHelper.GetRefNameForAzure(destination);
         }
         
         if (!string.IsNullOrEmpty(source))
         {
-            criteria.SourceRefName = GetRefName(source);
+            criteria.SourceRefName = GitBranchHelper.GetRefNameForAzure(source);
         }
 
         var result = await _gitClient.GetPullRequestsAsync(repository.Id.ToString(), criteria, top: top);
@@ -191,6 +192,4 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     {
         return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_build?definitionId={pipelineId}";
     }
-
-    private static string GetRefName(string branchName) => $"refs/heads/{branchName}";
 }

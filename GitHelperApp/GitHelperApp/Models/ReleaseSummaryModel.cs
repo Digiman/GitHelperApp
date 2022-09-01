@@ -13,4 +13,5 @@ public sealed class ReleaseSummaryModel
     public string PipelineUrl { get; set; }
     public int PullRequestId { get; set; }
     public string PullRequestUrl { get; set; }
+    public int WorkItemsCount { get; set; }
 }

@@ -17,6 +17,7 @@ public sealed class GitService : IGitService
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public List<string> GetBranchesList(string repoPath)
     {
         List<Branch> allBranches;
@@ -28,7 +29,8 @@ public sealed class GitService : IGitService
 
         return allBranches.Select(x => x.FriendlyName).ToList();
     }
-    
+
+    /// <inheritdoc />
     public (bool isChanges, int count, List<string> commits) CompareBranches(string repoPath, string source, string destination)
     {
         using (var repository = new Repository(repoPath))

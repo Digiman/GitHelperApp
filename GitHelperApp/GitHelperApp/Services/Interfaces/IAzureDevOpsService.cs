@@ -24,6 +24,7 @@ public interface IAzureDevOpsService
     Task<List<WorkItem>> GetWorkItemsLAsync(string teamProject, List<GitCommitRef> commits);
     Task<List<ResourceRef>> GetPullRequestDetailsAsync(GitRepository repository, int pullRequestId);
     Task<WebApiTagDefinition> CreatePullRequestLabelAsync(GitRepository repository, string teamProject, string name, int pullRequestId);
+    
     string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId);
     string BuildWorkItemUrl(string teamProject, string workItemId);
     string BuildRepositoryUrl(string teamProject, string name);

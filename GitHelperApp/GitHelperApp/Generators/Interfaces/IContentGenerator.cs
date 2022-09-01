@@ -3,6 +3,9 @@ using GitHelperApp.Models;
 
 namespace GitHelperApp.Generators.Interfaces;
 
+/// <summary>
+/// Content generator to create the text to output result.
+/// </summary>
 public interface IContentGenerator
 {
     List<string> ProcessCompareResults(RepositoriesConfig repositoriesConfig, IReadOnlyCollection<CompareResult> results);

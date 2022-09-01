@@ -1,6 +1,7 @@
 ﻿using GitHelperApp.Builders;
 using GitHelperApp.Configuration;
 using GitHelperApp.Extensions;
+using GitHelperApp.Helpers;
 using GitHelperApp.Models;
 using GitHelperApp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -218,10 +219,10 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
     private static GitPullRequest SearchForPrCreated(List<GitPullRequest> pullRequests, string title, string source, string destination)
     {
         return pullRequests.FirstOrDefault(x =>
-            (x.Title == title && x.SourceRefName == GitPullRequestBuilder.GetRefName(source)
-                              && x.TargetRefName == GitPullRequestBuilder.GetRefName(destination))
-            || (x.SourceRefName == GitPullRequestBuilder.GetRefName(source)
-                && x.TargetRefName == GitPullRequestBuilder.GetRefName(destination)));
+            (x.Title == title && x.SourceRefName == GitBranchHelper.GetRefNameForAzure(source)
+                              && x.TargetRefName == GitBranchHelper.GetRefNameForAzure(destination))
+            || (x.SourceRefName == GitBranchHelper.GetRefNameForAzure(source)
+                && x.TargetRefName == GitBranchHelper.GetRefNameForAzure(destination)));
     }
     
     private static PullRequestStatus ConvertStatus(string status)

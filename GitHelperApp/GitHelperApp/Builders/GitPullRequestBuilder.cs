@@ -1,4 +1,5 @@
-﻿using Microsoft.TeamFoundation.Core.WebApi;
+﻿using GitHelperApp.Helpers;
+using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.WebApi;
@@ -19,8 +20,8 @@ public sealed class GitPullRequestBuilder
         {
             Title = title,
             Description = description,
-            TargetRefName = GetRefName(destinationBranch),
-            SourceRefName = GetRefName(sourceBranch)
+            TargetRefName = GitBranchHelper.GetRefNameForAzure(destinationBranch),
+            SourceRefName = GitBranchHelper.GetRefNameForAzure(sourceBranch)
         };
     }
     
@@ -104,9 +105,11 @@ public sealed class GitPullRequestBuilder
 
         return this;
     }
-
-    public static string GetRefName(string branchName) => $"refs/heads/{branchName}";
-
+    
+    /// <summary>
+    /// Return the final result with the pull request created.
+    /// </summary>
+    /// <returns>Returns the pull request to use.</returns>
     public GitPullRequest Build()
     {
         return _pullRequest;

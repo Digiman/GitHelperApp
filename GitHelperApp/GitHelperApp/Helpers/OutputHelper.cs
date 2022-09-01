@@ -2,6 +2,9 @@
 
 namespace GitHelperApp.Helpers;
 
+/// <summary>
+/// Simple helper to provide the functionality to print result ot file or console. 
+/// </summary>
 public static class OutputHelper
 {
     public static void OutputResultToConsole(IReadOnlyCollection<string> lines)
