@@ -66,9 +66,12 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
                 {
                     Url = $"[{x.Id}]({x.Url})",
                     x.Title,
-                    x.Type
+                    x.Type,
+                    x.State,
+                    x.AreaPath,
+                    x.IterationPath
                 })
-                .ToMarkdownTable(new[] { "Id", "Title", "Type" }));
+                .ToMarkdownTable(new[] { "Id", "Title", "Type", "State", "Area Path", "Iteration Path" }));
 
             lines.Add(Environment.NewLine);
             index++;
@@ -99,8 +102,11 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
                 Url = $"[{x.Id}]({x.Url})",
                 x.Title,
                 x.Type,
+                x.State,
+                x.AreaPath,
+                x.IterationPath
             })
-            .ToMarkdownTable(new[] { "Id", "Title", "Type" }));
+            .ToMarkdownTable(new[] { "Id", "Title", "Type", "State", "Area Path", "Iteration Path" }));
 
         return lines;
     }
@@ -189,7 +195,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
                     x.Type,
                     x.State,
                     x.AreaPath,
-                    x.IterationPath,
+                    x.IterationPath
                 })
                 .ToMarkdownTable(new[] { "Id", "Title", "Type", "State", "Area Path", "Iteration Path" }));
 

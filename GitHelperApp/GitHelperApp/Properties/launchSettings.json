@@ -60,7 +60,7 @@
       "commandName": "Project",
       "commandLineArgs": "search-work-items -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "DR"
+        "GHA_ENVIRONMENT": "MD"
       }
     },
     "GitHelperApp-SearchWorkItems-Azure": {

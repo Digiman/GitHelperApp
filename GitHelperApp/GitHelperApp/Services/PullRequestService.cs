@@ -191,6 +191,8 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
         {
             var workItemsForActualPr = await _azureDevOpsService.GetPullRequestDetailsAsync(repo, actualPr.PullRequestId);
 
+            var workItems = await _azureDevOpsService.GetWorkItemsAsync(workItemsForActualPr);
+            
             _logger.LogInformation($"PR already created with Id {actualPr.PullRequestId}. Url: {actualPr.Url}. Work items count: {workItemsForActualPr.Count}.");
 
             return new PullRequestResult
@@ -198,7 +200,7 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                 PullRequestId = actualPr.PullRequestId,
                 RepositoryName = repositoryName,
                 Url = _azureDevOpsService.BuildPullRequestUrl(teamProject, repositoryName, actualPr.PullRequestId),
-                WorkItems = workItemsForActualPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id))).ToList(),
+                WorkItems = workItems.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(teamProject, x.Id.ToString()))).ToList(),
                 IsNew = false,
                 Title = actualPr.Title
             };

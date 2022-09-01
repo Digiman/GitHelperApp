@@ -11,11 +11,16 @@ public static class WorkItemExtensions
         {
             Id = workItem.Id.ToString(),
             Url = url,
-            Title = workItem.Fields["System.Title"].ToString(),
+            Title = ProcessWorkItemTitle(workItem.Fields["System.Title"].ToString()),
             Type = workItem.Fields["System.WorkItemType"].ToString(),
             AreaPath = workItem.Fields["System.AreaPath"].ToString(),
             IterationPath = workItem.Fields["System.IterationPath"].ToString(),
             State = workItem.Fields["System.State"].ToString()
         };
+    }
+
+    private static string ProcessWorkItemTitle(string title)
+    {
+        return title.Contains('|') ? title.Replace('|', '-') : title;
     }
 }

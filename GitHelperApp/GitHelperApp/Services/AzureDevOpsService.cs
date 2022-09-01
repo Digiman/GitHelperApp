@@ -151,6 +151,16 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         
         return wits;
     }
+    public async Task<List<WorkItem>> GetWorkItemsAsync(List<ResourceRef> resourceRefs)
+    {
+        var workItemIds = resourceRefs.Select(x => int.Parse(x.Id)).Distinct();
+        var wits = await _workItemTrackingHttpClient.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
+        {
+            Ids = workItemIds
+        });
+        
+        return wits;
+    }
 
     public async Task<List<WorkItem>> GetWorkItemsLAsync(string teamProject, List<GitCommitRef> commits)
     {
