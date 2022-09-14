@@ -143,17 +143,22 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
 
     public async Task<List<WorkItem>> GetWorkItemsAsync(List<GitCommitRef> commits)
     {
-        var workItemIds  = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct();
+        var workItemIds = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct().ToList();
+        if (!workItemIds.Any()) return Enumerable.Empty<WorkItem>().ToList();
+        
         var wits = await _workItemTrackingHttpClient.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
         {
             Ids = workItemIds
         });
-        
+
         return wits;
     }
+
     public async Task<List<WorkItem>> GetWorkItemsAsync(List<ResourceRef> resourceRefs)
     {
-        var workItemIds = resourceRefs.Select(x => int.Parse(x.Id)).Distinct();
+        var workItemIds = resourceRefs.Select(x => int.Parse(x.Id)).Distinct().ToList();
+        if (!workItemIds.Any()) return Enumerable.Empty<WorkItem>().ToList();
+        
         var wits = await _workItemTrackingHttpClient.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
         {
             Ids = workItemIds
@@ -164,7 +169,9 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
 
     public async Task<List<WorkItem>> GetWorkItemsLAsync(string teamProject, List<GitCommitRef> commits)
     {
-        var workItemIds = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct();
+        var workItemIds = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct().ToList();
+        if (!workItemIds.Any()) return Enumerable.Empty<WorkItem>().ToList();
+        
         var wits = await _workItemTrackingHttpClient.GetWorkItemsAsync(teamProject, workItemIds);
         
         return wits;
