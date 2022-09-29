@@ -142,6 +142,13 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
             else
             {
                 var workItems = await _azureDevOpsService.GetWorkItemsAsync(gitCommits);
+                
+                // add additional required work items from config - for some releases it can be added manually because no PRs or related items for commits
+                if (_workItemFilterConfig.WorkItemsToAdd.Any())
+                {
+                    var witToAdd = await _azureDevOpsService.GetWorkItemsAsync(_workItemFilterConfig.WorkItemsToAdd.ToList());
+                    workItems.AddRange(witToAdd);
+                }
 
                 workItems = ProcessWorkItems(workItems, _workItemFilterConfig, isFilter);
 

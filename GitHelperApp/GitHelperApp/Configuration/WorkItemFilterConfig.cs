@@ -19,4 +19,9 @@ public sealed class WorkItemFilterConfig
     /// Iterations paths in Azure DevOps.
     /// </summary>
     public string[] Iterations { get; set; }
+    
+    /// <summary>
+    /// Work Items Ids - to be added to each PR will be created
+    /// </summary>
+    public int[] WorkItemsToAdd { get; set; }
 }
