@@ -12,7 +12,7 @@ public interface IPullRequestService
     /// </summary>
     /// <param name="compareResults">Compare results from the first step.</param>
     /// <param name="isFilter">Is apply filter for work items?</param>
-    /// <param name="isDryRun">Run in rey run mode without actual PR creation.</param>
+    /// <param name="isDryRun">Run in dry run mode without actual PR creation.</param>
     /// <returns>Returns the PR result with details on each PR created/existed.</returns>
     Task<List<PullRequestResult>> CreatePullRequestsAsync(List<CompareResult> compareResults, bool isFilter, bool isDryRun = false);
 
@@ -23,4 +23,11 @@ public interface IPullRequestService
     /// <param name="count">Number of the records to select (top parameter for API).</param>
     /// <returns>Returns PR search result.</returns>
     Task<List<PullRequestSearchResult>> SearchPullRequestsAsync(string status, int count);
+    
+    /// <summary>
+    /// Create the single Pull Request with specific settings in env config file.
+    /// </summary>
+    /// <param name="isDryRun">Run in dry run mode without actual PR creation.</param>
+    /// <returns>Returns PR result with details.</returns>
+    Task<PullRequestResult> CreatePullRequestAsync(bool isDryRun = false);
 }

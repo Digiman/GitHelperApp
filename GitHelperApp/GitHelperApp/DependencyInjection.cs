@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.Configure<AppConfig>(configuration.GetSection(nameof(AppConfig)));
         services.Configure<PullRequestConfig>(configuration.GetSection(nameof(PullRequestConfig)));
         services.Configure<WorkItemFilterConfig>(configuration.GetSection(nameof(WorkItemFilterConfig)));
+        services.Configure<CustomPrConfig>(configuration.GetSection(nameof(CustomPrConfig)));
         
         // register services
         services.AddSingleton<IGitService, GitService>();

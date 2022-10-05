@@ -20,14 +20,16 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
     private readonly IAzureDevOpsService _azureDevOpsService;
     private readonly PullRequestConfig _pullRequestConfig;
     private readonly WorkItemFilterConfig _workItemFilterConfig;
+    private readonly CustomPrConfig _customPrConfig;
 
     public PullRequestService(ILogger<PullRequestService> logger, IAzureDevOpsService azureDevOpsService,
-        IOptions<RepositoriesConfig> repositoriesConfig, IOptions<PullRequestConfig> pullRequestModel,
-        IOptions<WorkItemFilterConfig> workItemFilterConfig)
+        IOptions<RepositoriesConfig> repositoriesConfig, IOptions<PullRequestConfig> pullRequestConfig,
+        IOptions<WorkItemFilterConfig> workItemFilterConfig, IOptions<CustomPrConfig> customPrConfig)
     {
         _logger = logger;
         _azureDevOpsService = azureDevOpsService;
-        _pullRequestConfig = pullRequestModel.Value;
+        _customPrConfig = customPrConfig.Value;
+        _pullRequestConfig = pullRequestConfig.Value;
         _repositoriesConfig = repositoriesConfig.Value;
         _workItemFilterConfig = workItemFilterConfig.Value;
     }
@@ -98,16 +100,34 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
 
         return result;
     }
-    
+
+    /// <inheritdoc />
+    public async Task<PullRequestResult> CreatePullRequestAsync(bool isDryRun = false)
+    {
+        var prModel = new PullRequestConfig
+        {
+            Title = _customPrConfig.Title,
+            Description = _customPrConfig.Description,
+            IsDraft = _customPrConfig.IsDraft,
+            Author = _customPrConfig.Author,
+            Tags = Enumerable.Empty<string>().ToArray()
+        };
+        
+        var result = await CreatePullRequestAsync(_customPrConfig.RepositoryName, _customPrConfig.TeamProject,
+            _customPrConfig.SourceBranch, _customPrConfig.DestinationBranch, prModel, false, isDryRun);
+
+        return result;
+    }
+
     #region Helpers.
     
     private async Task<PullRequestResult> CreatePullRequestAsync(string repositoryName, string teamProject, 
-        string sourceBranch, string destinationBranch, PullRequestConfig pullRequestModel, bool isFilter, bool isDryRun = false)
+        string sourceBranch, string destinationBranch, PullRequestConfig pullRequestConfig, bool isFilter, bool isDryRun = false)
     {
         var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryName, teamProject);
         var prs = await _azureDevOpsService.GetPullRequestsAsync(repo, PullRequestStatus.Active);
 
-        var prTitle = pullRequestModel.Title;
+        var prTitle = pullRequestConfig.Title;
 
         var actualPr = SearchForPrCreated(prs, prTitle, sourceBranch, destinationBranch);
         if (actualPr == null)
@@ -144,7 +164,7 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                 var workItems = await _azureDevOpsService.GetWorkItemsAsync(gitCommits);
                 
                 // add additional required work items from config - for some releases it can be added manually because no PRs or related items for commits
-                if (_workItemFilterConfig.WorkItemsToAdd.Any())
+                if (_workItemFilterConfig.WorkItemsToAdd != null && _workItemFilterConfig.WorkItemsToAdd.Any())
                 {
                     var witToAdd = await _azureDevOpsService.GetWorkItemsAsync(_workItemFilterConfig.WorkItemsToAdd.ToList());
                     workItems.AddRange(witToAdd);
@@ -152,13 +172,13 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
 
                 workItems = ProcessWorkItems(workItems, _workItemFilterConfig, isFilter);
 
-                var builder = new GitPullRequestBuilder(prTitle, pullRequestModel.Description, sourceBranch, destinationBranch);
+                var builder = new GitPullRequestBuilder(prTitle, pullRequestConfig.Description, sourceBranch, destinationBranch);
                 builder
-                    .WithAuthor(pullRequestModel.Author)
+                    .WithAuthor(pullRequestConfig.Author)
                     .WithWorkItems(workItems)
                     .WthDefaultReviewers()
-                    .WithTags(pullRequestModel.Tags);
-                if (pullRequestModel.IsDraft)
+                    .WithTags(pullRequestConfig.Tags);
+                if (pullRequestConfig.IsDraft)
                 {
                     builder.AsDraft();
                 }

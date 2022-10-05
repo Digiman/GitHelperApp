@@ -69,6 +69,20 @@
       "environmentVariables": {
         "GHA_ENVIRONMENT": "MD"
       }
+    },
+    "GitHelperApp-CreateCustomPr": {
+      "commandName": "Project",
+      "commandLineArgs": "create-custom-pr",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
+    },
+    "GitHelperApp-CreateCustomPr-DryRun": {
+      "commandName": "Project",
+      "commandLineArgs": "create-custom-pr -d true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
     }
   }
 }
