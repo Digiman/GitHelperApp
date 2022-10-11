@@ -57,6 +57,7 @@ public sealed class CompareService : ICompareService
         {
             if (!Directory.Exists(repositoryConfig.Path))
             {
+                _logger.LogInformation($"Repository path is not exists. Skipping processing {repositoryConfig.Name}");
                 continue;
             }
             
