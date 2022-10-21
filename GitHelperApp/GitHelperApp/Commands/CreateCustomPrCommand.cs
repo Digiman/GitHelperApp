@@ -12,10 +12,10 @@ public sealed class CreateCustomPrCommand : ICustomCommand
 {
     private readonly ILogger<CreateCustomPrCommand> _logger;
     private readonly IPullRequestService _pullRequestService;
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Dry run", ShortName = "d")]
     private bool DryRun { get; }
-    
+
     public CreateCustomPrCommand(ILogger<CreateCustomPrCommand> logger, IPullRequestService pullRequestService)
     {
         _logger = logger;
@@ -27,9 +27,9 @@ public sealed class CreateCustomPrCommand : ICustomCommand
         try
         {
             _logger.LogInformation("Start creating PR for all repository changes...");
-            
+
             var prResult = await _pullRequestService.CreatePullRequestAsync(DryRun);
-            
+
             _logger.LogInformation($"PR processed");
         }
         catch (Exception ex)

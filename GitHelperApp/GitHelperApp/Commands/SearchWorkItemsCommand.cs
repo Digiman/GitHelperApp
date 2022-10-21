@@ -18,16 +18,16 @@ public sealed class SearchWorkItemsCommand : ICustomCommand
 
     [Option(CommandOptionType.SingleValue, Description = "Print to console", ShortName = "pc")]
     private bool IsPrintToConsole { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Print to file", ShortName = "pf")]
     private bool IsPrintToFile { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Is apply filter or not?", ShortName = "f")]
     private bool IsFilter { get; }
 
     [Option(CommandOptionType.SingleValue, Description = "Compare type (local, azure)", ShortName = "ct")]
     private string CompareType { get; }
-    
+
     public SearchWorkItemsCommand(ILogger<SearchWorkItemsCommand> logger, ICompareService compareService,
         IOutputService outputService, IWorkItemsService workItemsService)
     {
@@ -49,15 +49,15 @@ public sealed class SearchWorkItemsCommand : ICustomCommand
             var results = await DoCompareAsync();
 
             _logger.LogInformation("Compare was finished");
-            
+
             // 2. Do processing to create the PRs
             _logger.LogInformation("Start searching the work items for changes...");
-            
+
             var witResults = await _workItemsService.SearchWorkItemsAsync(results, IsFilter);
-            
+
             // 3. Process the results - output
             _logger.LogInformation("Output work items search results...");
-            
+
             _outputService.OutputWorkItemsSearchResult(results, witResults, runId, directory, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)
@@ -67,7 +67,7 @@ public sealed class SearchWorkItemsCommand : ICustomCommand
             throw;
         }
     }
-    
+
     private async Task<List<CompareResult>> DoCompareAsync()
     {
         return CompareType switch

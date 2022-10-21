@@ -38,16 +38,16 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
     public async Task<List<PullRequestResult>> CreatePullRequestsAsync(List<CompareResult> compareResults, bool isFilter, bool isDryRun = false)
     {
         var result = new List<PullRequestResult>();
-        
+
         foreach (var compareResult in compareResults.Where(x => x.ChangesCount > 0))
         {
             _logger.LogInformation($"Processing PR for repository - {compareResult.RepositoryName}...");
-            
+
             var repoInfo = _repositoriesConfig.GetRepositoryConfig(compareResult.RepositoryName);
-            
+
             var prResult = await CreatePullRequestAsync(compareResult.RepositoryName, repoInfo.TeamProject,
                 repoInfo.SourceBranch, repoInfo.DestinationBranch, _pullRequestConfig, isFilter, isDryRun);
-            
+
             result.Add(prResult);
         }
 
@@ -60,23 +60,23 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
         var result = new List<PullRequestSearchResult>();
 
         var prStatus = ConvertStatus(status);
-        
+
         foreach (var repositoryConfig in _repositoriesConfig.Repositories)
         {
             _logger.LogInformation($"Searching for Pull Request in the {repositoryConfig.Name}...");
 
             repositoryConfig.GetRepositoryConfig(_repositoriesConfig);
-            
+
             var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryConfig.Name, repositoryConfig.TeamProject);
             var prsFromSource = await _azureDevOpsService.GetPullRequestsWithOptionsAsync(repo, prStatus, count,
                 source: repositoryConfig.SourceBranch);
             var prsToDestination = await _azureDevOpsService.GetPullRequestsWithOptionsAsync(repo, prStatus, count,
                 destination: repositoryConfig.DestinationBranch);
-            
+
             var prs = new List<GitPullRequest>(prsFromSource.Count + prsToDestination.Count);
             prs.AddRange(prsFromSource);
             prs.AddRange(prsToDestination);
-            
+
             foreach (var gitPullRequest in prs)
             {
                 var workItemsFlorPr = await _azureDevOpsService.GetPullRequestDetailsAsync(repo, gitPullRequest.PullRequestId);
@@ -93,7 +93,7 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                     WorkItems = workItemsFlorPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(repositoryConfig.TeamProject, x.Id))).ToList(),
                     IsNew = false
                 };
-                
+
                 result.Add(prResult);
             }
         }
@@ -112,7 +112,7 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
             Author = _customPrConfig.Author,
             Tags = Enumerable.Empty<string>().ToArray()
         };
-        
+
         var result = await CreatePullRequestAsync(_customPrConfig.RepositoryName, _customPrConfig.TeamProject,
             _customPrConfig.SourceBranch, _customPrConfig.DestinationBranch, prModel, false, isDryRun);
 
@@ -120,8 +120,8 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
     }
 
     #region Helpers.
-    
-    private async Task<PullRequestResult> CreatePullRequestAsync(string repositoryName, string teamProject, 
+
+    private async Task<PullRequestResult> CreatePullRequestAsync(string repositoryName, string teamProject,
         string sourceBranch, string destinationBranch, PullRequestConfig pullRequestConfig, bool isFilter, bool isDryRun = false)
     {
         var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repositoryName, teamProject);
@@ -137,7 +137,7 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
             if (gitCommits.Count == 0)
             {
                 _logger.LogWarning("Something goes wrong and no changes found to create the PR! Trying to search completed PR...");
-                
+
                 // search for PR that can already created and completed
                 var completedPrs = await _azureDevOpsService.GetPullRequestsAsync(repo, PullRequestStatus.Completed);
 
@@ -162,7 +162,7 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
             else
             {
                 var workItems = await _azureDevOpsService.GetWorkItemsAsync(gitCommits);
-                
+
                 // add additional required work items from config - for some releases it can be added manually because no PRs or related items for commits
                 if (_workItemFilterConfig.WorkItemsToAdd != null && _workItemFilterConfig.WorkItemsToAdd.Any())
                 {
@@ -219,7 +219,7 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
             var workItemsForActualPr = await _azureDevOpsService.GetPullRequestDetailsAsync(repo, actualPr.PullRequestId);
 
             var workItems = await _azureDevOpsService.GetWorkItemsAsync(workItemsForActualPr);
-            
+
             _logger.LogInformation($"PR already created with Id {actualPr.PullRequestId}. Url: {actualPr.Url}. Work items count: {workItemsForActualPr.Count}.");
 
             return new PullRequestResult
@@ -253,7 +253,7 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
             || (x.SourceRefName == GitBranchHelper.GetRefNameForAzure(source)
                 && x.TargetRefName == GitBranchHelper.GetRefNameForAzure(destination)));
     }
-    
+
     private static PullRequestStatus ConvertStatus(string status)
     {
         return status switch
@@ -275,6 +275,6 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
     {
         return refBranchName.AsSpan(11).ToString();
     }
-    
+
     #endregion
 }

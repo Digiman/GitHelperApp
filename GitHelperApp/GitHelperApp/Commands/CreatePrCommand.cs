@@ -18,19 +18,19 @@ public sealed class CreatePrCommand : ICustomCommand
 
     [Option(CommandOptionType.SingleValue, Description = "Print to console", ShortName = "pc")]
     private bool IsPrintToConsole { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Print to file", ShortName = "pf")]
     private bool IsPrintToFile { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Compare type (local, azure)", ShortName = "ct")]
     private string CompareType { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Is apply filter or not?", ShortName = "f")]
     private bool IsFilter { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Dry run", ShortName = "d")]
     private bool DryRun { get; }
-    
+
     public CreatePrCommand(ILogger<CreatePrCommand> logger, ICompareService compareService, IOutputService outputService, IPullRequestService pullRequestService)
     {
         _logger = logger;
@@ -51,17 +51,17 @@ public sealed class CreatePrCommand : ICustomCommand
             var results = await DoCompareAsync();
 
             _logger.LogInformation("Compare was finished");
-            
+
             // 2. Do processing to create the PRs
             _logger.LogInformation("Start creating PR for all repository changes...");
-            
+
             var prResults = await _pullRequestService.CreatePullRequestsAsync(results, IsFilter, DryRun);
-            
+
             _logger.LogInformation($"PR processed: {prResults.Count}");
-            
+
             // 3. Process the results - output
             _logger.LogInformation("Output compare results...");
-            
+
             _outputService.OutputFullResult(results, prResults, runId, directory, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)

@@ -17,13 +17,13 @@ public sealed class GetRepositoriesCommand : ICustomCommand
 
     [Option(CommandOptionType.SingleValue, Description = "Print to console", ShortName = "pc")]
     private bool IsPrintToConsole { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Print to file", ShortName = "pf")]
     private bool IsPrintToFile { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Team project", ShortName = "tp")]
     private string TeamProject { get; }
-    
+
     public GetRepositoriesCommand(ILogger<GetRepositoriesCommand> logger, IRepositoryService repositoryService,
         IOutputService outputService)
     {
@@ -37,7 +37,7 @@ public sealed class GetRepositoriesCommand : ICustomCommand
         try
         {
             _logger.LogInformation("Start searching for repositories Azure DevOps...");
-            
+
             var (runId, directory) = _outputService.InitializeOutputBatch("GetRepositories");
 
             // 1. Do search
@@ -52,16 +52,16 @@ public sealed class GetRepositoriesCommand : ICustomCommand
             }
 
             _logger.LogInformation("Search for repositories is finished");
-            
+
             _logger.LogInformation("Output results...");
-            
+
             // 2. Process the results
             _outputService.OutputRepositoriesResults(results, runId, directory, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occured during searching for repositories on Azure DevOps");
-            
+
             throw;
         }
     }

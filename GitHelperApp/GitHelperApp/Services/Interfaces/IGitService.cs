@@ -12,7 +12,7 @@ public interface IGitService
     /// <param name="repoPath">Path to the repository on local machine.</param>
     /// <returns>Returns the list of branches.</returns>
     List<string> GetBranchesList(string repoPath);
-    
+
     /// <summary>
     /// Compare branched.
     /// </summary>

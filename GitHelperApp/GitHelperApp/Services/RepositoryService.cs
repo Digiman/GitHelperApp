@@ -22,11 +22,11 @@ public sealed class RepositoryService : IRepositoryService
 
         return repositories.Select(CreateRepositoryModel).ToList();
     }
-    
+
     public async Task<List<RepositoryModel>> GetRepositoriesListAsync(string teamProject)
     {
         var repositories = await _azureDevOpsService.GetRepositoriesListAsync(teamProject);
-        
+
         return repositories.Select(CreateRepositoryModel).ToList();
     }
 

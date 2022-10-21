@@ -24,14 +24,14 @@ public sealed class GitPullRequestBuilder
             SourceRefName = GitBranchHelper.GetRefNameForAzure(sourceBranch)
         };
     }
-    
+
     public GitPullRequestBuilder WithAuthor(string userName)
     {
         _pullRequest.CreatedBy = new IdentityRef
         {
             Id = Constants.Users[userName]
         };
-        
+
         return this;
     }
     public GitPullRequestBuilder AsDraft()
@@ -51,10 +51,10 @@ public sealed class GitPullRequestBuilder
         {
             Id = Constants.Users[x]
         }).ToArray();
-        
+
         return this;
     }
-    
+
     public GitPullRequestBuilder WthDefaultReviewersForMain()
     {
         var userNames = new[] { "Admiral", "Haygood, Justin", "Brian Bober" };
@@ -62,10 +62,10 @@ public sealed class GitPullRequestBuilder
         {
             Id = Constants.Users[x]
         }).ToArray();
-        
+
         return this;
     }
-    
+
     public GitPullRequestBuilder WthReviewers(List<string> userNames)
     {
         if (userNames.Any())
@@ -105,7 +105,7 @@ public sealed class GitPullRequestBuilder
 
         return this;
     }
-    
+
     /// <summary>
     /// Return the final result with the pull request created.
     /// </summary>

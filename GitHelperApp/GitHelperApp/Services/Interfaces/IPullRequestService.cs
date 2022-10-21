@@ -23,7 +23,7 @@ public interface IPullRequestService
     /// <param name="count">Number of the records to select (top parameter for API).</param>
     /// <returns>Returns PR search result.</returns>
     Task<List<PullRequestSearchResult>> SearchPullRequestsAsync(string status, int count);
-    
+
     /// <summary>
     /// Create the single Pull Request with specific settings in env config file.
     /// </summary>

@@ -19,11 +19,11 @@ public static class OutputHelper
     {
         File.WriteAllLines(filename, lines);
     }
-    
+
     public static void OutputRepositoriesList(RepositoriesConfig repositoriesConfig)
     {
         var index = 1;
-        foreach (var repo in repositoriesConfig.Repositories.OrderBy(x=>x.Name))
+        foreach (var repo in repositoriesConfig.Repositories.OrderBy(x => x.Name))
         {
             Console.WriteLine($"{index}: {repo.Name}");
             index++;

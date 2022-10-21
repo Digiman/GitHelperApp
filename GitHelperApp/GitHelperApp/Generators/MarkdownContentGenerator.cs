@@ -40,7 +40,7 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
         }
 
         lines.Add(Environment.NewLine);
-        
+
         return lines;
     }
 
@@ -56,7 +56,7 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
             lines.Add($"PR was created with Id [{pullRequestResult.PullRequestId}]({pullRequestResult.Url}). Work items count: {pullRequestResult.WorkItems.Count}.");
             lines.Add("Work items:");
             lines.AddRange(pullRequestResult.WorkItems.Select(workItemModel => $"* Work Item Id: [{workItemModel.Id}]({workItemModel.Url})"));
-            
+
             lines.Add(Environment.NewLine);
             index++;
         }
@@ -124,7 +124,7 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
     public List<string> ProcessWorkItemsSearchResults(List<WorkItemSearchResult> witResults)
     {
         var lines = new List<string>();
-        
+
         lines.Add($"**Work items:**");
 
         var groups = witResults.GroupBy(x => x.RepositoryName);

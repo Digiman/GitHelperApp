@@ -19,7 +19,7 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     private readonly GitHttpClient _gitClient;
     private readonly AzureDevOpsConfig _config;
     private readonly WorkItemTrackingHttpClient _workItemTrackingHttpClient;
-    
+
     public AzureDevOpsService(IOptions<AzureDevOpsConfig> config)
     {
         _config = config.Value;
@@ -27,25 +27,25 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         var vstsCollectionUrl = _config.CollectionUrl;
 
         var creds = new VssBasicCredential(string.Empty, _config.Token);
-        var connection = new VssConnection(new Uri(vstsCollectionUrl), creds); 
+        var connection = new VssConnection(new Uri(vstsCollectionUrl), creds);
 
         _gitClient = connection.GetClient<GitHttpClient>();
         _workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
     }
-    
+
     public async Task<GitRepository> GetRepositoryAsync(Guid repositoryId)
     {
         var repo = await _gitClient.GetRepositoryAsync(repositoryId);
         return repo;
     }
-    
+
     public async Task<GitRepository> GetRepositoryByNameAsync(string name, string teamProject)
     {
         var repos = await _gitClient.GetRepositoriesAsync(teamProject);
         var repo = repos.SingleOrDefault(x => x.Name == name);
         return repo;
     }
-    
+
     public async Task<GitRepository> GetRepositoryByNameAsync(string name)
     {
         var repos = await _gitClient.GetRepositoriesAsync(_config.TeamProject);
@@ -58,7 +58,7 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         var result = await _gitClient.CreatePullRequestAsync(pullRequest, repository.Id);
         return result;
     }
-    
+
     public async Task<List<GitPullRequest>> GetPullRequestsAsync(GitRepository repository, PullRequestStatus status)
     {
         var result = await _gitClient.GetPullRequestsAsync(repository.Id.ToString(),
@@ -66,7 +66,7 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         return result;
     }
 
-    public async Task<List<GitPullRequest>> GetPullRequestsWithOptionsAsync(GitRepository repository, 
+    public async Task<List<GitPullRequest>> GetPullRequestsWithOptionsAsync(GitRepository repository,
         PullRequestStatus status, int top, string source = null, string destination = null)
     {
         var criteria = new GitPullRequestSearchCriteria
@@ -78,7 +78,7 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         {
             criteria.TargetRefName = GitBranchHelper.GetRefNameForAzure(destination);
         }
-        
+
         if (!string.IsNullOrEmpty(source))
         {
             criteria.SourceRefName = GitBranchHelper.GetRefNameForAzure(source);
@@ -119,7 +119,7 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     {
         var workItemIds = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct().ToList();
         if (!workItemIds.Any()) return Enumerable.Empty<WorkItem>().ToList();
-        
+
         var wits = await _workItemTrackingHttpClient.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
         {
             Ids = workItemIds
@@ -132,24 +132,24 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     {
         var workItemIds = resourceRefs.Select(x => int.Parse(x.Id)).Distinct().ToList();
         if (!workItemIds.Any()) return Enumerable.Empty<WorkItem>().ToList();
-        
+
         var wits = await _workItemTrackingHttpClient.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
         {
             Ids = workItemIds
         });
-        
+
         return wits;
     }
 
     public async Task<List<WorkItem>> GetWorkItemsAsync(List<int> workItemIds)
     {
         if (!workItemIds.Any()) return Enumerable.Empty<WorkItem>().ToList();
-        
+
         var wits = await _workItemTrackingHttpClient.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
         {
             Ids = workItemIds
         });
-        
+
         return wits;
     }
 
@@ -157,9 +157,9 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     {
         var workItemIds = commits.SelectMany(x => x.WorkItems).Select(x => int.Parse(x.Id)).Distinct().ToList();
         if (!workItemIds.Any()) return Enumerable.Empty<WorkItem>().ToList();
-        
+
         var wits = await _workItemTrackingHttpClient.GetWorkItemsAsync(teamProject, workItemIds);
-        
+
         return wits;
     }
 
@@ -169,38 +169,38 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         return result;
     }
 
-    public async Task<WebApiTagDefinition> CreatePullRequestLabelAsync(GitRepository repository, string teamProject, 
+    public async Task<WebApiTagDefinition> CreatePullRequestLabelAsync(GitRepository repository, string teamProject,
         string name, int pullRequestId)
     {
         return await _gitClient.CreatePullRequestLabelAsync(new WebApiCreateTagRequestData { Name = name },
             teamProject, repository.Id, pullRequestId);
     }
-    
+
     public async Task<List<GitRepository>> GetRepositoriesListAsync(string teamProject)
     {
         return await _gitClient.GetRepositoriesAsync(teamProject);
     }
-    
+
     public async Task<List<GitRepository>> GetRepositoriesListAsync()
     {
         return await _gitClient.GetRepositoriesAsync(_config.TeamProject);
     }
-    
+
     public string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId)
     {
         return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_git/{Uri.EscapeDataString(repositoryName)}/pullrequest/{pullRequestId}";
     }
-    
+
     public string BuildWorkItemUrl(string teamProject, string workItemId)
     {
         return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_workitems/edit/{workItemId}";
     }
-    
+
     public string BuildRepositoryUrl(string teamProject, string name)
     {
         return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_git/{Uri.EscapeDataString(name)}";
     }
-    
+
     public string BuildPipelineUrl(string teamProject, int pipelineId)
     {
         return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_build?definitionId={pipelineId}";

@@ -35,11 +35,11 @@ public sealed class OutputService : IOutputService
     public (string runId, string directory) InitializeOutputBatch(string commandName)
     {
         _logger.LogInformation("Initializing the batch...");
-        
+
         var runId = Guid.NewGuid().ToString("N");
-        
+
         var directoryName = BuildDirectoryName(commandName);
-        
+
         if (!Directory.Exists(_appConfig.ToString()))
         {
             Directory.CreateDirectory(_appConfig.OutputDirectory);
@@ -53,7 +53,7 @@ public sealed class OutputService : IOutputService
 
         return (runId, directoryName);
     }
-    
+
     public void OutputCompareResults(List<CompareResult> compareResults, string runId, string directory, bool isPrintToConsole = true, bool isPrintToFile = false)
     {
         var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
@@ -69,26 +69,26 @@ public sealed class OutputService : IOutputService
             OutputHelper.OutputResultToFile(lines, _fileNameGenerator.CreateFilenameForCompareResults(directory, runId));
         }
     }
-    
-    public void OutputFullResult(List<CompareResult> compareResults, List<PullRequestResult> prResults, 
+
+    public void OutputFullResult(List<CompareResult> compareResults, List<PullRequestResult> prResults,
         string runId, string directory, bool isPrintToConsole = false, bool isPrintToFile = false)
     {
         var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
-        
+
         // 1. File with the full results
         // 1.1. Process compare result.
         var lines = contentGenerator.ProcessCompareResults(_repositoriesConfig, compareResults);
 
         // 1. 2. Process PR result.
         lines.AddRange(contentGenerator.ProcessPrResults(prResults));
-        
+
         // build aggregates result
         if (_appConfig.OutputFormat == "markdown-table")
         {
             var aggregatedResult = BuildSummaryTableModel(compareResults, prResults);
             lines.AddRange(contentGenerator.ProcessSummaryTableResult(aggregatedResult));
         }
-        
+
         if (isPrintToConsole)
         {
             OutputHelper.OutputResultToConsole(lines);
@@ -98,7 +98,7 @@ public sealed class OutputService : IOutputService
         {
             OutputHelper.OutputResultToFile(lines, _fileNameGenerator.CreateFilenameForFullResults(directory, runId));
         }
-        
+
         // 2. Another separate files
         // 2.1. output only PRs to separate file
         if (prResults.Any(x => x.PullRequestId != 0))
@@ -115,7 +115,7 @@ public sealed class OutputService : IOutputService
         if (prResults.Any(x => x.PullRequestId != 0))
         {
             ProcessPrsResult(prResults, runId, directory, isPrintToConsole, isPrintToFile);
-        }    
+        }
     }
 
     public void OutputWorkItemsSearchResult(List<CompareResult> compareResults, List<WorkItemSearchResult> witResults,
@@ -130,7 +130,7 @@ public sealed class OutputService : IOutputService
 
         // 1.2. WorkItems details
         lines.AddRange(contentGenerator.ProcessWorkItemsSearchResults(witResults));
-        
+
         if (isPrintToConsole)
         {
             OutputHelper.OutputResultToConsole(lines);
@@ -142,12 +142,12 @@ public sealed class OutputService : IOutputService
         }
     }
 
-    public void OutputRepositoriesResults(List<RepositoryModel> repositoryModels, string runId, string directory, 
+    public void OutputRepositoriesResults(List<RepositoryModel> repositoryModels, string runId, string directory,
         bool isPrintToConsole, bool isPrintToFile)
     {
         var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
         var lines = contentGenerator.ProcessRepositoriesResult(repositoryModels);
-        
+
         if (isPrintToConsole)
         {
             OutputHelper.OutputResultToConsole(lines);
@@ -160,17 +160,17 @@ public sealed class OutputService : IOutputService
     }
 
     #region Helpers.
-    
+
     private static string BuildDirectoryName(string commandName)
     {
         return $"{commandName}-{DateTime.Now:dd-MM-yyyy-HH-mm}";
     }
-    
+
     private void ProcessPrsResult(List<PullRequestResult> prResults, string runId, string directory, bool isPrintToConsole, bool isPrintToFile)
     {
         var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
         var lines = contentGenerator.ProcessPullRequestsSummary(prResults);
-        
+
         if (isPrintToConsole)
         {
             OutputHelper.OutputResultToConsole(lines);
@@ -181,12 +181,12 @@ public sealed class OutputService : IOutputService
             OutputHelper.OutputResultToFile(lines, _fileNameGenerator.CreateFileNameForPrIds(directory, runId));
         }
     }
-    
+
     private void ProcessWorkItemsResult(List<PullRequestResult> prResults, string runId, string directory, bool isPrintToConsole, bool isPrintToFile)
     {
         var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
         var lines = contentGenerator.ProcessWorkItemsSummary(prResults);
-        
+
         if (isPrintToConsole)
         {
             OutputHelper.OutputResultToConsole(lines);
@@ -202,7 +202,7 @@ public sealed class OutputService : IOutputService
     {
         var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
         var lines = contentGenerator.ProcessPullRequestSearchResult(prResults);
-        
+
         if (isPrintToConsole)
         {
             OutputHelper.OutputResultToConsole(lines);
@@ -213,7 +213,7 @@ public sealed class OutputService : IOutputService
             OutputHelper.OutputResultToFile(lines, _fileNameGenerator.CreateFileNameForPrIds(directory, runId));
         }
     }
-    
+
     private List<ReleaseSummaryModel> BuildSummaryTableModel(List<CompareResult> compareResults, List<PullRequestResult> prResults)
     {
         var result = new List<ReleaseSummaryModel>(_repositoriesConfig.Repositories.Count);
@@ -242,10 +242,10 @@ public sealed class OutputService : IOutputService
                 WorkItemsCount = prDetails.WorkItems?.Count ?? 0
             };
             result.Add(model);
-            
+
             index++;
         }
-        
+
         return result;
     }
 

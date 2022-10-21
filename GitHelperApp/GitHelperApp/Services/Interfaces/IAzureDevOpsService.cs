@@ -26,7 +26,7 @@ public interface IAzureDevOpsService
     Task<WebApiTagDefinition> CreatePullRequestLabelAsync(GitRepository repository, string teamProject, string name, int pullRequestId);
     Task<List<GitRepository>> GetRepositoriesListAsync(string teamProject);
     Task<List<GitRepository>> GetRepositoriesListAsync();
-    
+
     string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId);
     string BuildWorkItemUrl(string teamProject, string workItemId);
     string BuildRepositoryUrl(string teamProject, string name);

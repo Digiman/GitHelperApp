@@ -26,7 +26,7 @@ public static class WorkItemsHelper
     private static List<WorkItem> FilterByType(this List<WorkItem> wits, string[] types)
     {
         if (!types.Any()) return wits;
-        
+
         var filtered = wits
             .Where(x => x.Fields.ContainsKey("System.WorkItemType"))
             .Where(x => types.Contains(x.Fields["System.WorkItemType"])).ToList();
@@ -37,7 +37,7 @@ public static class WorkItemsHelper
     private static List<WorkItem> FilterByAreaPath(this List<WorkItem> wits, string[] areas)
     {
         if (!areas.Any()) return wits;
-        
+
         var filtered = wits
             .Where(x => x.Fields.ContainsKey("System.AreaPath"))
             .Where(x => areas.Contains(x.Fields["System.AreaPath"])).ToList();
@@ -48,7 +48,7 @@ public static class WorkItemsHelper
     private static List<WorkItem> FilterByIterationPath(this List<WorkItem> wits, string[] iterations)
     {
         if (!iterations.Any()) return wits;
-        
+
         var filtered = wits
             .Where(x => x.Fields.ContainsKey("System.IterationPath"))
             .Where(x => iterations.Contains(x.Fields["System.IterationPath"])).ToList();

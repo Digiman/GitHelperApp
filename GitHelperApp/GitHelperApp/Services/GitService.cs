@@ -21,7 +21,7 @@ public sealed class GitService : IGitService
     public List<string> GetBranchesList(string repoPath)
     {
         List<Branch> allBranches;
-        
+
         using (var repository = new Repository(repoPath))
         {
             allBranches = repository.Branches.ToList();
@@ -59,7 +59,7 @@ public sealed class GitService : IGitService
             else
             {
                 _logger.LogWarning("Branches can't be compared because some of them or both not exists!");
-                
+
                 return (false, 0, new List<string>());
             }
         }

@@ -31,7 +31,7 @@ public sealed class CompareService : ICompareService
     public List<CompareResult> CompareLocal()
     {
         var compareResults = CompareBranchesLocal(_repositoriesConfig);
-        
+
         return compareResults;
     }
 
@@ -42,7 +42,7 @@ public sealed class CompareService : ICompareService
 
         return compareResult;
     }
-    
+
     #region Helper functions with the main logic.
 
     /// <summary>
@@ -60,11 +60,11 @@ public sealed class CompareService : ICompareService
                 _logger.LogInformation($"Repository path is not exists. Skipping processing {repositoryConfig.Name}");
                 continue;
             }
-            
+
             var repoInfo = repositoryConfig.GetRepositoryConfig(repositoriesConfig);
-            
+
             _logger.LogInformation($"Repository: {repoInfo.Name}. Comparing: {repoInfo.SourceBranch} -> {repoInfo.DestinationBranch}");
-            
+
             var (isChanges, count, commits) = _gitService.CompareBranches(repositoryConfig.Path,
                 GitBranchHelper.GetRefName(repoInfo.SourceBranch),
                 GitBranchHelper.GetRefName(repoInfo.DestinationBranch));
@@ -94,9 +94,9 @@ public sealed class CompareService : ICompareService
         {
             // get extended repo info - with the default values if not provided
             var repoInfo = repositoriesConfig.GetRepositoryConfig(repositoryConfig.Name);
-            
+
             _logger.LogInformation($"Repository: {repoInfo.Name}. Comparing: {repoInfo.SourceBranch} -> {repoInfo.DestinationBranch}");
-            
+
             var repo = await _azureDevOpsService.GetRepositoryByNameAsync(repoInfo.Name, repoInfo.TeamProject);
 
             var gitCommits = await _azureDevOpsService.GetCommitsDetailsAsync(repo,
@@ -109,7 +109,7 @@ public sealed class CompareService : ICompareService
 
             // var changesCount = gitCommits.Select(x => x.ChangeCounts).Sum(x => x.Count); // old logic to calculate the changes that works wrong!(
             var changesCount = commitDiffs.BehindCount ?? 0; // better but locally it works correct not as here(
-            
+
             result.Add(new CompareResult
             {
                 SourceBranch = repoInfo.SourceBranch,
@@ -122,6 +122,6 @@ public sealed class CompareService : ICompareService
 
         return result;
     }
-    
+
     #endregion
 }

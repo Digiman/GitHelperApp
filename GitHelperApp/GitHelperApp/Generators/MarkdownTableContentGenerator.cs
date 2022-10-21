@@ -42,7 +42,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         }
 
         lines.Add(Environment.NewLine);
-        
+
         return lines;
     }
 
@@ -51,7 +51,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         var lines = new List<string>();
 
         lines.Add("# Pull Request details");
-        
+
         // 1. Details for each PR.
         var index = 1;
         foreach (var pullRequestResult in prResults)
@@ -117,7 +117,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         {
             lines.Add($"Repository name: **{group.Key}**. Pull Requests ({group.Count()}):");
             lines.AddRange(CreatePullRequestExtendedTable(group.ToList()));
-            
+
             lines.Add(Environment.NewLine);
         }
 
@@ -127,7 +127,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
     public List<string> ProcessWorkItemsSearchResults(List<WorkItemSearchResult> witResults)
     {
         var lines = new List<string>();
-        
+
         lines.Add($"**Work items:**");
 
         var groups = witResults.GroupBy(x => x.RepositoryName);
@@ -161,7 +161,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
 
         lines.Add($"# Repositories list (Count = {repositoryModels.Count})");
         lines.AddRange(CreateRepositoriesTable(repositoryModels));
-        
+
         return lines;
     }
 
@@ -228,7 +228,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
             })
             .ToMarkdownTable(new[] { "Id", "Title", "Type", "State", "Area Path", "Iteration Path" });
     }
-    
+
     private static IEnumerable<string> CreateSummaryTable(List<ReleaseSummaryModel> aggregatedResult)
     {
         return aggregatedResult

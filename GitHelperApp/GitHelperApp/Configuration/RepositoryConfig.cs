@@ -19,7 +19,7 @@ public sealed class RepositoryConfig
     /// Source branch - to override the default.
     /// </summary>
     public string SourceBranch { get; set; }
-    
+
     /// <summary>
     /// Destination branch - to override the default
     /// </summary>
@@ -29,7 +29,7 @@ public sealed class RepositoryConfig
     /// Default project or specific used for repository.
     /// </summary>
     public string TeamProject { get; set; }
-    
+
     /// <summary>
     /// Id of the build pipeline used to build and deploy applications from repository.
     /// </summary>

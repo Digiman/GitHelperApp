@@ -25,7 +25,7 @@ public static class DependencyInjection
         services.Configure<PullRequestConfig>(configuration.GetSection(nameof(PullRequestConfig)));
         services.Configure<WorkItemFilterConfig>(configuration.GetSection(nameof(WorkItemFilterConfig)));
         services.Configure<CustomPrConfig>(configuration.GetSection(nameof(CustomPrConfig)));
-        
+
         // register services
         services.AddSingleton<IGitService, GitService>();
         services.AddSingleton<IAzureDevOpsService, AzureDevOpsService>();
@@ -34,13 +34,13 @@ public static class DependencyInjection
         services.AddSingleton<IPullRequestService, PullRequestService>();
         services.AddSingleton<IWorkItemsService, WorkItemsService>();
         services.AddTransient<IRepositoryService, RepositoryService>();
-        
+
         // add content generators
         services.AddSingleton<IContentGeneratorFactory, ContentGeneratorFactory>();
-        
+
         // add generators
         services.AddSingleton<IFileNameGenerator, FileNameGenerator>();
-        
+
         return services;
     }
 }

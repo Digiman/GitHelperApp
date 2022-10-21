@@ -40,14 +40,14 @@ public sealed class TextFileContentGenerator : BaseContentGenerator, IContentGen
         }
 
         lines.Add(Environment.NewLine);
-        
+
         return lines;
     }
-    
+
     public List<string> ProcessPrResults(List<PullRequestResult> prResults)
     {
         var lines = new List<string>();
-        
+
         // 1. Details for each PR.
         var index = 1;
         foreach (var pullRequestResult in prResults)
@@ -60,9 +60,9 @@ public sealed class TextFileContentGenerator : BaseContentGenerator, IContentGen
             lines.Add(Environment.NewLine);
             index++;
         }
-        
+
         lines.Add(Environment.NewLine);
-        
+
         // 2. PR summary
         if (prResults.Any(x => x.PullRequestId != 0))
         {
@@ -74,10 +74,10 @@ public sealed class TextFileContentGenerator : BaseContentGenerator, IContentGen
 
         // 3. Process the list of Work Items to have unique list at the end of log file
         var workItems = ProcessUniqueWorkItems(prResults);
-        
+
         lines.Add($"Work items summary ({workItems.Count}):");
         lines.AddRange(workItems.Select(workItemModel => $"\tWork Item Id: {workItemModel.Id}. Url: {workItemModel.Url}"));
-        
+
         return lines;
     }
 
@@ -93,16 +93,16 @@ public sealed class TextFileContentGenerator : BaseContentGenerator, IContentGen
     public List<string> ProcessWorkItemsSummary(List<PullRequestResult> prResults)
     {
         var lines = new List<string>();
-        
+
         // process the list of Work Items to have unique list at the end of log file
         var workItems = ProcessUniqueWorkItems(prResults);
-        
+
         lines.Add($"Work items summary ({workItems.Count}):");
         lines.AddRange(workItems.Select(workItemModel => $"\tWork Item Id: {workItemModel.Id}. Url: {workItemModel.Url}"));
 
         return lines;
     }
-    
+
     public List<string> ProcessPullRequestSearchResult(List<PullRequestSearchResult> prResults)
     {
         var lines = new List<string>();
@@ -123,7 +123,7 @@ public sealed class TextFileContentGenerator : BaseContentGenerator, IContentGen
     public List<string> ProcessWorkItemsSearchResults(List<WorkItemSearchResult> witResults)
     {
         var lines = new List<string>();
-        
+
         lines.Add($"Work items:");
 
         var groups = witResults.GroupBy(x => x.RepositoryName);

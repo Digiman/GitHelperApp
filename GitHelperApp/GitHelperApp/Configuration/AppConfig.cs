@@ -9,7 +9,7 @@ public sealed class AppConfig
     /// Path to save the files the results.
     /// </summary>
     public string OutputDirectory { get; set; }
-    
+
     /// <summary>
     /// Format for the files with the results.
     /// </summary>

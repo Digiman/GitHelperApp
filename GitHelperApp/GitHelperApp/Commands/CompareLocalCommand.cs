@@ -16,10 +16,10 @@ public sealed class CompareLocalCommand : ICustomCommand
 
     [Option(CommandOptionType.SingleValue, Description = "Print to console", ShortName = "pc")]
     private bool IsPrintToConsole { get; }
-    
+
     [Option(CommandOptionType.SingleValue, Description = "Print to file", ShortName = "pf")]
     private bool IsPrintToFile { get; }
-    
+
     public CompareLocalCommand(ILogger<CompareLocalCommand> logger, ICompareService compareService, IOutputService outputService)
     {
         _logger = logger;
@@ -32,25 +32,25 @@ public sealed class CompareLocalCommand : ICustomCommand
         try
         {
             _logger.LogInformation("Start local comparing for repositories...");
-            
+
             var (runId, directory) = _outputService.InitializeOutputBatch("CompareLocal");
 
             // 1. Do compare for repositories and branches from configuration file locally with LibGit2Sharp
             var results = _compareService.CompareLocal();
 
             _logger.LogInformation("Compare was finished");
-            
+
             _logger.LogInformation("Output compare results...");
-            
+
             // 2. Process the results
             _outputService.OutputCompareResults(results, runId, directory, IsPrintToConsole, IsPrintToFile);
-            
+
             return Task.CompletedTask;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occured during processing comparing for repositories locally");
-            
+
             throw;
         }
     }
