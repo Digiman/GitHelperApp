@@ -11,14 +11,14 @@
       "commandName": "Project",
       "commandLineArgs": "compare-local -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "DR"
+        "GHA_ENVIRONMENT": "RD"
       }
     },
     "GitHelperApp-CompareAzure": {
       "commandName": "Project",
       "commandLineArgs": "compare-azure -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "DR"
+        "GHA_ENVIRONMENT": "RD"
       }
     },
     "GitHelperApp-CreatePr-DryRun": {
@@ -46,7 +46,7 @@
       "commandName": "Project",
       "commandLineArgs": "create-pr -pf true -ct azure -f true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "DR"
+        "GHA_ENVIRONMENT": "MD"
       }
     },
     "GitHelperApp-SearchPr": {
@@ -80,6 +80,13 @@
     "GitHelperApp-CreateCustomPr-DryRun": {
       "commandName": "Project",
       "commandLineArgs": "create-custom-pr -d true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
+    },
+    "GitHelperApp-GetRepositories": {
+      "commandName": "Project",
+      "commandLineArgs": "get-repositories -pf true",
       "environmentVariables": {
         "GHA_ENVIRONMENT": "Local"
       }

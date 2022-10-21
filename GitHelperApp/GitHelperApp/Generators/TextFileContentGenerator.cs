@@ -142,6 +142,21 @@ public sealed class TextFileContentGenerator : BaseContentGenerator, IContentGen
     public List<string> ProcessSummaryTableResult(List<ReleaseSummaryModel> aggregatedResult)
     {
         // TODO: no need to add the logic here because text file is not supported the tables
-        return new List<string>();
+        return Enumerable.Empty<string>().ToList();
+    }
+
+    public List<string> ProcessRepositoriesResult(List<RepositoryModel> repositoryModels)
+    {
+        var lines = new List<string>();
+
+        lines.Add($"Repositories list (Count = {repositoryModels.Count}):");
+        var index = 1;
+        foreach (var repositoryModel in repositoryModels.OrderBy(x => x.Name))
+        {
+            lines.Add($"{index}. {repositoryModel.Name} (Url = {repositoryModel.RemoteUrl})");
+            index++;
+        }
+
+        return lines;
     }
 }

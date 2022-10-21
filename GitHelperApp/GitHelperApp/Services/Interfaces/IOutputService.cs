@@ -20,4 +20,7 @@ public interface IOutputService
 
     void OutputWorkItemsSearchResult(List<CompareResult> compareResults, List<WorkItemSearchResult> witResults,
         string runId, string directory, bool isPrintToConsole, bool isPrintToFile);
+
+    void OutputRepositoriesResults(List<RepositoryModel> repositoryModels, 
+        string runId, string directory, bool isPrintToConsole, bool isPrintToFile);
 }

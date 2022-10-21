@@ -10,8 +10,6 @@ namespace GitHelperApp.Services.Interfaces;
 /// </summary>
 public interface IAzureDevOpsService
 {
-    Task<List<string>> GetRepositoriesAsync(string teamProject);
-    Task<List<string>> GetRepositoriesAsync();
     Task<GitRepository> GetRepositoryAsync(Guid repositoryId);
     Task<GitRepository> GetRepositoryByNameAsync(string name, string teamProject);
     Task<GitRepository> GetRepositoryByNameAsync(string name);
@@ -26,6 +24,8 @@ public interface IAzureDevOpsService
     Task<List<WorkItem>> GetWorkItemsLAsync(string teamProject, List<GitCommitRef> commits);
     Task<List<ResourceRef>> GetPullRequestDetailsAsync(GitRepository repository, int pullRequestId);
     Task<WebApiTagDefinition> CreatePullRequestLabelAsync(GitRepository repository, string teamProject, string name, int pullRequestId);
+    Task<List<GitRepository>> GetRepositoriesListAsync(string teamProject);
+    Task<List<GitRepository>> GetRepositoriesListAsync();
     
     string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId);
     string BuildWorkItemUrl(string teamProject, string workItemId);

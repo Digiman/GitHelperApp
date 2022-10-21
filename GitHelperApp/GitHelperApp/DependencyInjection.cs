@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddSingleton<IOutputService, OutputService>();
         services.AddSingleton<IPullRequestService, PullRequestService>();
         services.AddSingleton<IWorkItemsService, WorkItemsService>();
+        services.AddTransient<IRepositoryService, RepositoryService>();
         
         // add content generators
         services.AddSingleton<IContentGeneratorFactory, ContentGeneratorFactory>();

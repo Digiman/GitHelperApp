@@ -142,6 +142,23 @@ public sealed class OutputService : IOutputService
         }
     }
 
+    public void OutputRepositoriesResults(List<RepositoryModel> repositoryModels, string runId, string directory, 
+        bool isPrintToConsole, bool isPrintToFile)
+    {
+        var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
+        var lines = contentGenerator.ProcessRepositoriesResult(repositoryModels);
+        
+        if (isPrintToConsole)
+        {
+            OutputHelper.OutputResultToConsole(lines);
+        }
+
+        if (isPrintToFile)
+        {
+            OutputHelper.OutputResultToFile(lines, _fileNameGenerator.CreateFileNameForRepositories(directory, runId));
+        }
+    }
+
     #region Helpers.
     
     private static string BuildDirectoryName(string commandName)

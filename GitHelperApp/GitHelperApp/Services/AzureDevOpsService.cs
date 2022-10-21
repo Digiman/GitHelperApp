@@ -32,33 +32,7 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         _gitClient = connection.GetClient<GitHttpClient>();
         _workItemTrackingHttpClient = connection.GetClient<WorkItemTrackingHttpClient>();
     }
-
-    public async Task<List<string>> GetRepositoriesAsync(string teamProject)
-    {
-        var result = new List<string>();
-
-        var repos = await _gitClient.GetRepositoriesAsync(teamProject);
-        foreach (var repo in repos)
-        {
-            result.Add(repo.Name);
-        }
-
-        return result;
-    }
     
-    public async Task<List<string>> GetRepositoriesAsync()
-    {
-        var result = new List<string>();
-
-        var repos = await _gitClient.GetRepositoriesAsync(_config.TeamProject);
-        foreach (var repo in repos)
-        {
-            result.Add(repo.Name);
-        }
-
-        return result;
-    }
-
     public async Task<GitRepository> GetRepositoryAsync(Guid repositoryId)
     {
         var repo = await _gitClient.GetRepositoryAsync(repositoryId);
@@ -200,6 +174,16 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
     {
         return await _gitClient.CreatePullRequestLabelAsync(new WebApiCreateTagRequestData { Name = name },
             teamProject, repository.Id, pullRequestId);
+    }
+    
+    public async Task<List<GitRepository>> GetRepositoriesListAsync(string teamProject)
+    {
+        return await _gitClient.GetRepositoriesAsync(teamProject);
+    }
+    
+    public async Task<List<GitRepository>> GetRepositoriesListAsync()
+    {
+        return await _gitClient.GetRepositoriesAsync(_config.TeamProject);
     }
     
     public string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId)

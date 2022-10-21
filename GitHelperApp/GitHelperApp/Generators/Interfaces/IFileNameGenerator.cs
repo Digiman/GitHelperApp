@@ -9,4 +9,5 @@ public interface IFileNameGenerator
     string CreateFilenameForFullResults(string directory, string runId);
     string CreateFileNameForPrIds(string directory, string runId);
     string CreateFileNameForWorkItems(string directory, string runId);
+    string CreateFileNameForRepositories(string directory, string runId);
 }

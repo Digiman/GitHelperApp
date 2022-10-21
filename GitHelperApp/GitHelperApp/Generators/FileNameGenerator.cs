@@ -28,6 +28,9 @@ public sealed class FileNameGenerator : IFileNameGenerator
     public string CreateFileNameForWorkItems(string directory, string runId) =>
         Path.Combine(_appConfig.OutputDirectory, directory, $"Wit-{runId}.{GetExtension(_appConfig.OutputFormat)}");
 
+    public string CreateFileNameForRepositories(string directory, string runId) =>
+        Path.Combine(_appConfig.OutputDirectory, directory, $"Repositories-{runId}.{GetExtension(_appConfig.OutputFormat)}");
+
     private static string GetExtension(string format)
     {
         return format switch

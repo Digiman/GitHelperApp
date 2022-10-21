@@ -14,6 +14,7 @@ namespace GitHelperApp;
 [Subcommand(typeof(SearchPrCommand))]
 [Subcommand(typeof(SearchWorkItemsCommand))]
 [Subcommand(typeof(CreateCustomPrCommand))]
+[Subcommand(typeof(GetRepositoriesCommand))]
 public sealed class Application
 {
     /// <summary>
