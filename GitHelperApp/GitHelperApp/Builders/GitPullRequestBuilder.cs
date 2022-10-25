@@ -44,8 +44,10 @@ public sealed class GitPullRequestBuilder
     {
         var userNames = new[]
         {
-            "Admiral", "Haygood, Justin", "Brian Bober", // Matrix team
-            "Ivan Grishkov", "Oleg Solonko", "Konstantin Bondarenko", "Stas Ivanousky" // Oxagile team
+            "Hydrogen", "Oxygen", // teams
+            "Haygood, Justin", "Brian Bober", // Matrix team members
+            "Ivan Grishkov", "Oleg Solonko", "Konstantin Bondarenko", "Stas Ivanousky", // Oxagile team
+            "Adan Jauregui" // other teams
         };
         _pullRequest.Reviewers = userNames.Select(x => new IdentityRefWithVote
         {

@@ -11,14 +11,14 @@
       "commandName": "Project",
       "commandLineArgs": "compare-local -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "RD"
+        "GHA_ENVIRONMENT": "DR"
       }
     },
     "GitHelperApp-CompareAzure": {
       "commandName": "Project",
       "commandLineArgs": "compare-azure -pf true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "RD"
+        "GHA_ENVIRONMENT": "DR"
       }
     },
     "GitHelperApp-CreatePr-DryRun": {

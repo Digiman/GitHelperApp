@@ -19,8 +19,6 @@ public readonly struct Constants
 
         // Admiral team
         { "Xabier Hernandez", "a859462e-0137-4397-ad3a-c06b6498c2fd" },
-        { "Nazmus Sakib", "2c17c81c-aae6-4e9a-8650-a6717e9c128b" },
-        { "Adan Jauregui", "8289fb73-b378-46ca-ad24-f1e50e7bc261" },
         { "Emilio deLeon", "68b98354-0a0c-4539-b72a-11e31233b061" },
         { "Dominic Rzepecki", "8476d6d6-de66-41a1-8aa6-fe2441e08b41" },
 

@@ -16,6 +16,7 @@ public sealed class RepositoryService : IRepositoryService
         _azureDevOpsService = azureDevOpsService;
     }
 
+    /// <inheritdoc />
     public async Task<List<RepositoryModel>> GetRepositoriesListAsync()
     {
         var repositories = await _azureDevOpsService.GetRepositoriesListAsync();
@@ -23,6 +24,7 @@ public sealed class RepositoryService : IRepositoryService
         return repositories.Select(CreateRepositoryModel).ToList();
     }
 
+    /// <inheritdoc />
     public async Task<List<RepositoryModel>> GetRepositoriesListAsync(string teamProject)
     {
         var repositories = await _azureDevOpsService.GetRepositoriesListAsync(teamProject);
