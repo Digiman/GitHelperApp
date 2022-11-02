@@ -90,6 +90,13 @@
       "environmentVariables": {
         "GHA_ENVIRONMENT": "Local"
       }
+    },
+    "GitHelperApp-GetRepositories - Videa Git": {
+      "commandName": "Project",
+      "commandLineArgs": "get-repositories -pf true -tp \"Videa Git\"",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
     }
   }
 }

@@ -12,7 +12,7 @@ public interface IRepositoryService
     /// </summary>
     /// <returns>Returns list of git repositories info.</returns>
     Task<List<RepositoryModel>> GetRepositoriesListAsync();
-    
+
     /// <summary>
     /// Get list of repositories by the team project.
     /// </summary>
