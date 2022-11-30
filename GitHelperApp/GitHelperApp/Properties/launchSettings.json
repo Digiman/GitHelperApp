@@ -46,14 +46,14 @@
       "commandName": "Project",
       "commandLineArgs": "create-pr -pf true -ct azure -f true",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "MD"
+        "GHA_ENVIRONMENT": "DR"
       }
     },
     "GitHelperApp-SearchPr": {
       "commandName": "Project",
       "commandLineArgs": "search-pr -pf true -s active -c 5",
       "environmentVariables": {
-        "GHA_ENVIRONMENT": "RD"
+        "GHA_ENVIRONMENT": "DR"
       }
     },
     "GitHelperApp-SearchWorkItems": {
