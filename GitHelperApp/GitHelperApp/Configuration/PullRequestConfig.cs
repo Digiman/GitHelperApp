@@ -29,4 +29,9 @@ public sealed class PullRequestConfig
     /// The list of tags to be added to the new Pull Request.
     /// </summary>
     public string[] Tags { get; set; }
+    
+    /// <summary>
+    /// Create with autocomplete option.
+    /// </summary>
+    public bool Autocomplete { get; set; }
 }

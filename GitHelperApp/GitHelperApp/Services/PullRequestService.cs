@@ -178,9 +178,17 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                     .WithWorkItems(workItems)
                     .WthDefaultReviewers()
                     .WithTags(pullRequestConfig.Tags);
+                
+                // create as draft
                 if (pullRequestConfig.IsDraft)
                 {
                     builder.AsDraft();
+                }
+                
+                // create with auto-complete
+                if (pullRequestConfig.Autocomplete)
+                {
+                    builder.WithAutocomplete(pullRequestConfig.Author);
                 }
 
                 var pr = builder.Build();

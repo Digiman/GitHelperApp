@@ -107,6 +107,25 @@ public sealed class GitPullRequestBuilder
 
         return this;
     }
+    
+    /// <summary>
+    /// Configure PR to set as auto-complete with default merge strategy.
+    /// </summary>
+    /// <param name="userName">Username to use as committer for auto completed PR.</param>
+    /// <returns>Returns builder instance.</returns>
+    public GitPullRequestBuilder WithAutocomplete(string userName)
+    {
+        _pullRequest.CompletionOptions = new GitPullRequestCompletionOptions
+        {
+            MergeStrategy = GitPullRequestMergeStrategy.NoFastForward
+        };
+        _pullRequest.AutoCompleteSetBy = new IdentityRef
+        {
+            Id = Constants.Users[userName]
+        }; 
+
+        return this;
+    }
 
     /// <summary>
     /// Return the final result with the pull request created.

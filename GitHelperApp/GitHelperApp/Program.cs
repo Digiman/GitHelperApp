@@ -52,17 +52,20 @@ internal static class Program
                 configHost.SetBasePath(appLocation);
                 configHost.AddJsonFile(HostSettings, true);
                 configHost.AddEnvironmentVariables(Prefix);
-            }).ConfigureAppConfiguration((hostContext, configApp) =>
+            })
+            .ConfigureAppConfiguration((hostContext, configApp) =>
             {
                 configApp.SetBasePath(appLocation);
-                configApp.AddJsonFile(AppSettings, optional: true);
-                configApp.AddJsonFile($"{AppSettingsPrefix}.{hostContext.HostingEnvironment.EnvironmentName}.json",
-                    optional: true);
+                configApp.AddJsonFile(AppSettings);
+                configApp.AddJsonFile($"{AppSettingsPrefix}.{hostContext.HostingEnvironment.EnvironmentName}.json", optional: true);
                 configApp.AddEnvironmentVariables(prefix: Prefix);
             })
             .ConfigureServices((hostContext, services) =>
             {
                 services.InitializeDependencies(hostContext.Configuration);
             })
-            .UseSerilog((hostContext, configLog) => { configLog.ReadFrom.Configuration(hostContext.Configuration); });
+            .UseSerilog((hostContext, configLog) =>
+            {
+                configLog.ReadFrom.Configuration(hostContext.Configuration);
+            });
 }
