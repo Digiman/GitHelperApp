@@ -1,0 +1,102 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "GitHelperApp": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
+    },
+    "GitHelperApp-CompareLocal": {
+      "commandName": "Project",
+      "commandLineArgs": "compare-local -pf true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-CompareAzure": {
+      "commandName": "Project",
+      "commandLineArgs": "compare-azure -pf true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-CreatePr-DryRun": {
+      "commandName": "Project",
+      "commandLineArgs": "create-pr -pf true -d true -f true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-CreatePr-Azure-DryRun": {
+      "commandName": "Project",
+      "commandLineArgs": "create-pr -pf true -ct azure -d true -f true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-CreatePr": {
+      "commandName": "Project",
+      "commandLineArgs": "create-pr -pf true -f true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-CreatePr-Azure": {
+      "commandName": "Project",
+      "commandLineArgs": "create-pr -pf true -ct azure -f true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-SearchPr": {
+      "commandName": "Project",
+      "commandLineArgs": "search-pr -pf true -s active -c 5",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-SearchWorkItems": {
+      "commandName": "Project",
+      "commandLineArgs": "search-work-items -pf true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "MD"
+      }
+    },
+    "GitHelperApp-SearchWorkItems-Azure": {
+      "commandName": "Project",
+      "commandLineArgs": "search-work-items -pf true -ct azure",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "MD"
+      }
+    },
+    "GitHelperApp-CreateCustomPr": {
+      "commandName": "Project",
+      "commandLineArgs": "create-custom-pr",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
+    },
+    "GitHelperApp-CreateCustomPr-DryRun": {
+      "commandName": "Project",
+      "commandLineArgs": "create-custom-pr -d true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
+    },
+    "GitHelperApp-GetRepositories": {
+      "commandName": "Project",
+      "commandLineArgs": "get-repositories -pf true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
+    },
+    "GitHelperApp-GetRepositories - Videa Git": {
+      "commandName": "Project",
+      "commandLineArgs": "get-repositories -pf true -tp \"Videa Git\"",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "Local"
+      }
+    }
+  }
+}
