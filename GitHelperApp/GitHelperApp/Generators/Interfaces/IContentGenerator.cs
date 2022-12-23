@@ -16,4 +16,5 @@ public interface IContentGenerator
     List<string> ProcessWorkItemsSearchResults(List<WorkItemSearchResult> witResults);
     List<string> ProcessSummaryTableResult(List<ReleaseSummaryModel> aggregatedResult);
     List<string> ProcessRepositoriesResult(List<RepositoryModel> repositoryModels);
+    IReadOnlyCollection<string> ProcessBuildDetailsResult(List<BuildDetails> buildResults);
 }

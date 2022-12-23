@@ -160,4 +160,10 @@ public sealed class MarkdownContentGenerator : BaseContentGenerator, IContentGen
 
         return lines;
     }
+
+    public IReadOnlyCollection<string> ProcessBuildDetailsResult(List<BuildDetails> buildResults)
+    {
+        // TODO: no need to add the logic here because simple markdown file is not supported the tables
+        return Enumerable.Empty<string>().ToList();
+    }
 }

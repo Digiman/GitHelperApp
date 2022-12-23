@@ -165,7 +165,19 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         return lines;
     }
 
-    private IEnumerable<string> CreateRepositoriesTable(List<RepositoryModel> repositoryModels)
+    public IReadOnlyCollection<string> ProcessBuildDetailsResult(List<BuildDetails> buildResults)
+    {
+        var lines = new List<string>();
+        
+        lines.Add($"# Build details (Count = {buildResults.Count})");
+        lines.AddRange(CreateBuildDetailsTable(buildResults));
+        
+        return lines;
+    }
+    
+    #region Helpers.
+
+    private static IEnumerable<string> CreateRepositoriesTable(List<RepositoryModel> repositoryModels)
     {
         return repositoryModels
             .OrderBy(x => x.Name)
@@ -176,9 +188,7 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
             })
             .ToMarkdownTable(new[] { "#", "Title" });
     }
-
-    #region Helpers.
-
+    
     private static IEnumerable<string> CreatePullRequestList(List<PullRequestResult> prResults)
     {
         return prResults.Where(x => x.PullRequestId != 0)
@@ -241,6 +251,29 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
                 x.WorkItemsCount
             })
             .ToMarkdownTable(new[] { "#", "Repository", "Build Pipeline", "PR", "Work Items Count" });
+    }
+    
+    private static IEnumerable<string> CreateBuildDetailsTable(List<BuildDetails> buildResults)
+    {
+        return buildResults
+            .Where(x => x != null)
+            .Select((x, index) => new
+            {
+                Index = index + 1,
+                Repo = $"[{x.RepositoryName}]({x.RepositoryUrl})",
+                x.Environment,
+                x.SourceBranch,
+                SourceLink = $"[{x.SourceVersion}]({x.SourceCommitLink})",
+                Link = x.Status == "None"
+                    ? $"[Pipeline]({x.BuildLink})"
+                    : $"[Build ({x.Status})]({x.BuildLink})",
+                x.RequestedFor,
+                x.StartTime,
+                x.FinishTime,
+                CurrentLink = $"[{x.CurrentCommit}]({x.CurrentCommitLink})",
+                x.Message
+            })
+            .ToMarkdownTable(new[] { "#", "Repository", "Environment", "Branch", "Commit", "Build", "Requested For", "Start", "End", "Current Commit", "Status" });
     }
 
     #endregion

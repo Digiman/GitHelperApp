@@ -196,18 +196,53 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         return await _gitClient.GetRepositoriesAsync(_config.TeamProject);
     }
 
-    public async Task<Build> GetBuildDetailsAsync(string teamProject, int buildId)
+    public async Task<List<GitCommitRef>> GetLastCommitAsync(GitRepository repository, string branch)
     {
-        var result = await _buildHttpClient.GetBuildAsync(teamProject, buildId);
+        var result = await _gitClient.GetCommitsAsync(repository.Id,
+            new GitQueryCommitsCriteria { ItemVersion = new GitVersionDescriptor { Version = branch } }, top: 1);
         return result;
+    }
+    
+    public async Task<Build> GetLastBuildDetailsAsync(string teamProject, int buildId)
+    {
+        var tmp = await _buildHttpClient.GetBuildsAsync(teamProject, new[] { buildId }, top: 1);
+        
+        return tmp.FirstOrDefault();
+    }
+    
+    public async Task<Build> GetLastBuildDetailsAsync(string teamProject, int buildId, string branchName)
+    {
+        var azureBranch = GitBranchHelper.GetRefNameForAzure(branchName);
+        var builds = await _buildHttpClient.GetBuildsAsync(teamProject, new[] { buildId }, branchName: azureBranch, top: 1);
+
+        return builds.FirstOrDefault();
+    }
+
+    public async Task<List<Build>> GetBuildDetailsAsync(string teamProject, int buildId, int top = 10)
+    {
+        var builds = await _buildHttpClient.GetBuildsAsync(teamProject, new[] { buildId }, top: top);
+
+        return builds;
+    }
+    
+    public async Task<List<Build>> GetBuildDetailsAsync(string teamProject, int buildId, string branchName, int top = 10)
+    {
+        var azureBranch = GitBranchHelper.GetRefNameForAzure(branchName);
+        var builds = await _buildHttpClient.GetBuildsAsync(teamProject, new[] { buildId }, branchName: azureBranch, top: top);
+
+        return builds;
     }
 
     public async Task<Pipeline> GetPipelineAsyncAsync(string teamProject, int pipelineId)
     {
         var pipeline = await _pipelinesHttpClient.GetPipelineAsync(teamProject, pipelineId);
+
+        // var runs = await _pipelinesHttpClient.ListRunsAsync(teamProject, pipelineId);
+        // var run = await _pipelinesHttpClient.GetRunAsync(teamProject, pipelineId, runs.First().Id);
+        
         return pipeline;
     }
-
+    
     public async Task<Run> RunPipelineAsyncAsync(string teamProject, int pipelineId, PipelineRunSettings settings, bool isDryRun = false)
     {
         // TODO: this functionality is now working so it needed to wait for final API to be working :(
@@ -242,17 +277,25 @@ public sealed class AzureDevOpsService : IAzureDevOpsService
         return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_workitems/edit/{workItemId}";
     }
 
-    public string BuildRepositoryUrl(string teamProject, string name)
+    public string BuildRepositoryUrl(string teamProject, string repositoryName)
     {
-        return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_git/{Uri.EscapeDataString(name)}";
+        return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_git/{Uri.EscapeDataString(repositoryName)}";
     }
 
     public string BuildPipelineUrl(string teamProject, int pipelineId)
     {
         return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_build?definitionId={pipelineId}";
     }
-    
-    public static string GetRefName(string branchName) => $"refs/heads/{branchName}";
+
+    public string BuildBuildResultUrl(string teamProject, int buildId)
+    {
+        return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_build/results?buildId={buildId}&view=results";
+    }
+
+    public string BuildRepositoryCommitUrl(string teamProject, string repositoryName, string commit)
+    {
+        return $"{_config.CollectionUrl}/{Uri.EscapeDataString(teamProject)}/_git/{Uri.EscapeDataString(repositoryName)}/commit/{commit}";
+    }
 
     private RunResourcesParameters DeserializeRunResourcesParameters(string value)
     {

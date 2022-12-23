@@ -159,6 +159,23 @@ public sealed class OutputService : IOutputService
         }
     }
 
+    public void OutputBuildDetailsResult(List<BuildDetails> buildResults, string runId, string directory, bool isPrintToConsole,
+        bool isPrintToFile)
+    {
+        var contentGenerator = _contentGeneratorFactory.GetContentGenerator(_appConfig.OutputFormat);
+        var lines = contentGenerator.ProcessBuildDetailsResult(buildResults);
+        
+        if (isPrintToConsole)
+        {
+            OutputHelper.OutputResultToConsole(lines);
+        }
+
+        if (isPrintToFile)
+        {
+            OutputHelper.OutputResultToFile(lines, _fileNameGenerator.CreateFileNameForBuildDetails(directory, runId));
+        }
+    }
+
     #region Helpers.
 
     private static string BuildDirectoryName(string commandName)

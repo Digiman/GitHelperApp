@@ -6,11 +6,12 @@ using Microsoft.Extensions.Logging;
 
 namespace GitHelperApp.Commands;
 
-// TODO: implement this command later...
-
-public sealed class RunPipelinesCommand : ICustomCommand
+/// <summary>
+/// Special command to process the builds and get latest build runs.
+/// </summary>
+public sealed class GetBuildsCommand : ICustomCommand
 {
-    private readonly ILogger<RunPipelinesCommand> _logger;
+    private readonly ILogger<GetBuildsCommand> _logger;
     private readonly IPipelineService _pipelineService;
     private readonly IOutputService _outputService;
 
@@ -25,11 +26,8 @@ public sealed class RunPipelinesCommand : ICustomCommand
     
     [Option(CommandOptionType.SingleValue, Description = "Environment", ShortName = "e")]
     private string Environment { get; }
-    
-    [Option(CommandOptionType.SingleValue, Description = "Dry run", ShortName = "d")]
-    private bool DryRun { get; }
-    
-    public RunPipelinesCommand(ILogger<RunPipelinesCommand> logger, IPipelineService pipelineService, IOutputService outputService)
+
+    public GetBuildsCommand(ILogger<GetBuildsCommand> logger, IPipelineService pipelineService, IOutputService outputService)
     {
         _logger = logger;
         _pipelineService = pipelineService;
@@ -40,28 +38,29 @@ public sealed class RunPipelinesCommand : ICustomCommand
     {
         try
         {
-            var (runId, directory) = _outputService.InitializeOutputBatch("RunPipelines");
+            var (runId, directory) = _outputService.InitializeOutputBatch("GetBuilds");
             
             // start pipelines
-            _logger.LogInformation("Start pipelines for repositories...");
+            _logger.LogInformation("Start searching for builds...");
 
             var settings = new PipelineRunSettings
             {
                 Branch = Branch,
                 Environment = Environment
             };
-            var runResults = await _pipelineService.RunPipelineAsync(settings, DryRun);
-            
-            _logger.LogInformation($"Pipelines processed: {runResults.Count}");
+
+            var buildResults = await _pipelineService.GetBuildDetailsAsync(settings);
+
+            _logger.LogInformation($"Builds processed: {buildResults.Count}");
 
             // output the results
-            _logger.LogInformation("Output pipelines run results...");
+            _logger.LogInformation("Output build run results...");
 
-            // TODO: implement the logic to print results
+            _outputService.OutputBuildDetailsResult(buildResults, runId, directory, IsPrintToConsole, IsPrintToFile);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occured while running pipelines on Azure DevOps");
+            _logger.LogError(ex, "Error occured while searching builds on Azure DevOps");
 
             throw;
         }

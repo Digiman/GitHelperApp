@@ -29,13 +29,20 @@ public interface IAzureDevOpsService
     Task<WebApiTagDefinition> CreatePullRequestLabelAsync(GitRepository repository, string teamProject, string name, int pullRequestId);
     Task<List<GitRepository>> GetRepositoriesListAsync(string teamProject);
     Task<List<GitRepository>> GetRepositoriesListAsync();
+
+    Task<List<GitCommitRef>> GetLastCommitAsync(GitRepository repository, string branch);
+    Task<Build> GetLastBuildDetailsAsync(string teamProject, int buildId);
+    Task<Build> GetLastBuildDetailsAsync(string teamProject, int buildId, string branchName);
+    Task<List<Build>> GetBuildDetailsAsync(string teamProject, int buildId, int top = 10);
+    Task<List<Build>> GetBuildDetailsAsync(string teamProject, int buildId, string branchName, int top = 10);
     
-    Task<Build> GetBuildDetailsAsync(string teamProject, int buildId);
     Task<Pipeline> GetPipelineAsyncAsync(string teamProject, int pipelineId);
     Task<Run> RunPipelineAsyncAsync(string teamProject, int pipelineId, PipelineRunSettings settings, bool isDryRun = false);
     
     string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId);
     string BuildWorkItemUrl(string teamProject, string workItemId);
-    string BuildRepositoryUrl(string teamProject, string name);
+    string BuildRepositoryUrl(string teamProject, string repositoryName);
     string BuildPipelineUrl(string teamProject, int pipelineId);
+    string BuildBuildResultUrl(string teamProject, int buildId);
+    string BuildRepositoryCommitUrl(string teamProject, string repositoryName, string commit);
 }
