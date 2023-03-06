@@ -86,8 +86,8 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
                     PullRequestId = gitPullRequest.PullRequestId,
                     Title = gitPullRequest.Title,
                     Description = gitPullRequest.Description,
-                    SourceBranch = RemoveRefName(gitPullRequest.SourceRefName),
-                    DestinationBranch = RemoveRefName(gitPullRequest.TargetRefName),
+                    SourceBranch = GitBranchHelper.RemoveRefName(gitPullRequest.SourceRefName),
+                    DestinationBranch = GitBranchHelper.RemoveRefName(gitPullRequest.TargetRefName),
                     RepositoryName = repositoryConfig.Name,
                     Url = _azureDevOpsService.BuildPullRequestUrl(repositoryConfig.TeamProject, repo.Name, gitPullRequest.PullRequestId),
                     WorkItems = workItemsFlorPr.Select(x => x.ToModel(_azureDevOpsService.BuildWorkItemUrl(repositoryConfig.TeamProject, x.Id))).ToList(),
@@ -272,16 +272,6 @@ public sealed class PullRequestService : BaseSharedService, IPullRequestService
             "all" => PullRequestStatus.All,
             _ => PullRequestStatus.NotSet
         };
-    }
-
-    /// <summary>
-    /// Remove the branch ref header - 'refs/heads/'.
-    /// </summary>
-    /// <param name="refBranchName">Branch name with full ref from the Azure DevOps.</param>
-    /// <returns>Returns the branch name without ref name.</returns>
-    private static string RemoveRefName(string refBranchName)
-    {
-        return refBranchName.AsSpan(11).ToString();
     }
 
     #endregion

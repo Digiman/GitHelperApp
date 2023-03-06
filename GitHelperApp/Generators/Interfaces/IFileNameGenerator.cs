@@ -10,4 +10,5 @@ public interface IFileNameGenerator
     string CreateFileNameForPrIds(string directory, string runId);
     string CreateFileNameForWorkItems(string directory, string runId);
     string CreateFileNameForRepositories(string directory, string runId);
+    string CreateFileNameForBuildDetails(string directory, string runId);
 }

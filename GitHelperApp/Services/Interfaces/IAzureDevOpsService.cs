@@ -1,4 +1,7 @@
-﻿using Microsoft.TeamFoundation.Core.WebApi;
+﻿using GitHelperApp.Models;
+using Microsoft.Azure.Pipelines.WebApi;
+using Microsoft.TeamFoundation.Build.WebApi;
+using Microsoft.TeamFoundation.Core.WebApi;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.WebApi;
@@ -27,8 +30,19 @@ public interface IAzureDevOpsService
     Task<List<GitRepository>> GetRepositoriesListAsync(string teamProject);
     Task<List<GitRepository>> GetRepositoriesListAsync();
 
+    Task<List<GitCommitRef>> GetLastCommitAsync(GitRepository repository, string branch);
+    Task<Build> GetLastBuildDetailsAsync(string teamProject, int buildId);
+    Task<Build> GetLastBuildDetailsAsync(string teamProject, int buildId, string branchName);
+    Task<List<Build>> GetBuildDetailsAsync(string teamProject, int buildId, int top = 10);
+    Task<List<Build>> GetBuildDetailsAsync(string teamProject, int buildId, string branchName, int top = 10);
+    
+    Task<Pipeline> GetPipelineAsyncAsync(string teamProject, int pipelineId);
+    Task<Run> RunPipelineAsyncAsync(string teamProject, int pipelineId, PipelineRunSettings settings, bool isDryRun = false);
+    
     string BuildPullRequestUrl(string teamProject, string repositoryName, int pullRequestId);
     string BuildWorkItemUrl(string teamProject, string workItemId);
-    string BuildRepositoryUrl(string teamProject, string name);
+    string BuildRepositoryUrl(string teamProject, string repositoryName);
     string BuildPipelineUrl(string teamProject, int pipelineId);
+    string BuildBuildResultUrl(string teamProject, int buildId);
+    string BuildRepositoryCommitUrl(string teamProject, string repositoryName, string commit);
 }
