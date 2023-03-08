@@ -1,26 +1,28 @@
 # GitHelperApp
 
+Documentation and usage usage scenarios for application as original idea and solution. 
+
 ## Introduction
 
 The tool created specially for managing the complexity with identifying changes in many repositories. Because we have a lot of repositories to
-manage and also for releases we need to create the Pull Requests we have got an idea to build the automation tool.
-First idea was about identify the changes for repositories to be able to get the list of them.
-Second idea after getting the result of comparison - create Pull request automatically.
+manage and also for releases we need to create the Pull Requests we have got an idea to build the automation tool. First idea was about identify the changes for repositories to be able to get the list of them. Second idea after getting the result of comparison - create Pull request automatically.
 
 So the basic use cases and workflow to use the tool:
 
-1. Create PRs for release from Dev to Release branches.
-2. Create PRs after release from Release to Main branches.
-3. Create PRs after release from Main to Dev branches -to sync the work items.
+1. Create the PRs for release from Dev to Release branches.
+2. Create the PRs after release from Release to Main branches.
+3. Create the PRs after release from Main to Dev branches -to sync the work items.
 
-Currently configuration of the tool support next ways to compare:
+Originally tool supported the next ways to compare:
 
 1. Dev to Release (DR).
 2. Release to Main (RM).
 3. Main to Dev (MD).
 4. Release to Dev (RD).
 
-This set in the separate configuration files.
+*NOTE: Of cause it can be changed very simple and create the new configuration files for any possible combinations of branch names.*
+
+This setup in the separate configuration files.
 
 ## How to use
 
@@ -35,11 +37,9 @@ Now it’s available some special commands and actions:
 
 More details provided for each command available in the application.
 
-Each operations build as Command in the code. It can be simple to add a new command and logic because applications is very
-extendible.
+Each operations build as Command in the code. It can be simple to add a new command and logic because applications is very extendible.
 
-For each command already added simple launch profile in the launchSettings.json file so it can be just selected right one and choose the
-environment name (config to use).
+For each command already added simple launch profile in the *launchSettings.json* file so it can be just selected right one and choose the environment name (config to use).
 
 ```json
 {
@@ -139,12 +139,9 @@ environment name (config to use).
 }
 ```
 
-
 ### 1 Compare local repositories
 
-The command able to run compare between branches (internally it used 'origin/*' to handle the even local repo but remote branches with actual
-changes) for repositories. Configuration provided in the appsettings.json file for all repos and path to them cloned locally.
-Here is using the [LibGit2Sharp](https://github.com/libgit2/libgit2sharp) library as official tool to with with Git.
+The command able to run compare between branches (internally it used 'origin/*' to handle the even local repo but remote branches with actual changes) for repositories. Configuration provided in the *appsettings.json* file for all repos and path to them cloned locally. Here is using the [LibGit2Sharp](https://github.com/libgit2/libgit2sharp) library as official tool to with with Git.
 
 *For this logic it needs to clone all the repositories locally to have actual configuration, folder with Git repo, remote (origin).*
 
@@ -159,8 +156,7 @@ Results:
 
 ### 2 Compare on Azure DevOps
 
-Process all the repositories from the configuration file and search for changes between branches. In he configuration we can provide the name
-for bot branches to compare -source and destination.
+Process all the repositories from the configuration file and search for changes between branches. In he configuration we can provide the name for bot branches to compare -source and destination.
 
 Command arguments:
 
@@ -173,8 +169,7 @@ Results:
 
 ### 3 Create Pull Request
 
-Here the logic based on searching he changes between branches locally and if they exists - create the Pull Requests on Azure. After this will be
-generated full result with a lot of data.
+Here the logic based on searching he changes between branches locally and if they exists - create the Pull Requests on Azure. After this will be generated full result with a lot of data.
 
 *This command mostly used to prepare the PRs and identify changes for release - like Sprint 8 release and etc.*
 
@@ -216,8 +211,7 @@ Result:
 ### 5 Search work items
 
 Search for work items for the changes in the repositories. It allows to find the work items for git commits found as difference between branches.
-This feature can be used to identify actual work items will be used for PRs as part of the release and verify that all the items added and not
-added much more not needed by the links.
+This feature can be used to identify actual work items will be used for PRs as part of the release and verify that all the items added and not added much more not needed by the links.
 
 Command arguments:
 1. pc - IsPrintToConsole - is print results to console.
@@ -230,8 +224,7 @@ Results:
 
 ### 6 Create custom PR (single)
 
-The special command to use to create the single PR based on some settings. Idea here was to use another user to create commit from his side.
-But actually even if provide the another author it will use actual user who own the PAT token used to auth with Azure DevOps. So in this case it need to have additional configuration and functionality to support multi user support (not in scope and maybe in future only).
+The special command to use to create the single PR based on some settings. Idea here was to use another user to create commit from his side. But actually even if provide the another author it will use actual user who own the PAT token used to auth with Azure DevOps. So in this case it need to have additional configuration and functionality to support multi user support (not in scope and maybe in future only).
 
 Command arguments:
 
@@ -308,11 +301,9 @@ Configuration sections:
     - Description - description.
     - IsDraft - is it will be draft PR.
 
-All the additional configuration used internally in the code and if needed (depends on the use cases) can be moved to the config files in different
-sections.
+All the additional configuration used internally in the code and if needed (depends on the use cases) can be moved to the config files in different sections.
 
-*Idea: Possible later user configuration can be moved to the config file to able to edit it in more simple way or will be used (need to find the
-actual API to call the Azure DevOps to get such details).*
+*Idea: Possible later user configuration can be moved to the config file to able to edit it in more simple way or will be used (need to find the actual API to call the Azure DevOps to get such details).*
 
 ## Results
 
@@ -327,7 +318,7 @@ All results can be placed to the next files:
 1. Prs-{guid}.txt (md) - pull request details.
 2. Wit-{guid}.txt (md) - work items details.
 3. ResultsFull-{guid}.txt (md) - full results.
-4. Repositories-{giuid}.txt (md) - list of the repositories found in team project.
+4. Repositories-{guid}.txt (md) - list of the repositories found in team project.
 
 For each application run in the output folder generated every time. This folder has pattern for name:
 **$"{commandName}-{DateTime.Now:dd-MM-yyyy-HH-mm}"** - command name and date and time. So it very basic solution.
@@ -352,8 +343,7 @@ Main logic placed in the services:
 Operations in the application handled with the [CommandLineUtils](https://github.com/natemcmaster/CommandLineUtils) and special classes named as commands:
 
 1. SearchPrCommand - command to do the search Pull requests.
-2. CreatePrCommand - command to run compare and create PR for repositories with changes (only for them, if no changes available we
-don't need to create PR).
+2. CreatePrCommand - command to run compare and create PR for repositories with changes (only for them, if no changes available we don't need to create PR).
 3. CompareLocalCommand - command to run the local compare - need to have all the repositories cloned locally.
 4. CompareAzureCommand - command to run compare repositories on Azure DevOps.
 5. SearchWorkItemsCommand - command to run the search for Work Items.
@@ -363,14 +353,12 @@ don't need to create PR).
 Application also have separate logic for generation content based on results to output to file and console, logic to generate the filenames and etc.:
 
 1. TextFileContentGenerator - generator to create the strings with results in the text format.
-2. MarkdownContentGenerator - generator to create the strings with results in the Markdown format (better to read and use in some
-other places because can be rendered).
-3. MarkdownTableContentGenerator - generator to create the string with content in the Markdown format but with support of tables in
-some lines instead of the usual line.
+2. MarkdownContentGenerator - generator to create the strings with results in the Markdown format (better to read and use in some other places because can be rendered).
+3. MarkdownTableContentGenerator - generator to create the string with content in the Markdown format but with support of tables in some lines instead of the usual line.
 4. FileNameGenerator - logic to create names for files to save the results.
 5. ContentGeneratorFactory - simple factory to use proper content generator for processing the results.
 
-Most of the code use logger to put the messages to the log (console and file, can be added a lot of different sinks because of Serilog is used). Also added some documentation comments as well.
+Most of the code use logger to put the messages to the log (console and file, can be added a lot of different sinks because of [Serilog](https://github.com/serilog/serilog) is used). Also added some documentation comments as well.
 Most of the possible settings that can be changes or need to be different for comparing (like branches, PR details, etc.) included in the configuration so it can be simply changes without rebuilding the application.
 
 ---
@@ -394,9 +382,9 @@ Implemented features:
 
 ---
 
-Using the tool during the release
-For usual release we have a lot of changes in the different repositories and it hard to track all the changes for them. So the solutions is the new
-tool that able to run comparison between branches and identify the changes and build list of them.
+## Using the tool during the sprint release
+
+For usual release we have a lot of changes in the different repositories and it hard to track all the changes for them. So the solution here is to have the new tool that able to run comparison between branches and identify the changes and build list of them.
 
 The tool help to:
 
@@ -418,20 +406,12 @@ By using the tool we can:
 2. Create new PRs.
 3. Create and update the page with release notes.
 
-So as we can see based on this steps and functionality the tool can optimize and improve the routines for release process and use results for
-Release notes page.
-
 How to use:
-
-1. Run the tool to compare the branches - use predefined run profiles in launchsettings.json - GitHelperApp-CompareLocal or GitHelperApp-CompareAzure.
+1. Run the tool to compare the branches - use predefined run profiles in *launchsettings.json* - GitHelperApp-CompareLocal or GitHelperApp-CompareAzure.
     - Review the results and identify how many repositories are needed to be merged.
-2. Create the Release Notes pages (if not available yet).
-    - For quick create can be used template - MM/DD/YYYY Sprint XX Release Notes - this is custom template used for all release notes pages and updated as much as possible to include all the changes and improvements.
-3. Run the tool to create PR - use predefined run profiles in launchsettings.json - GitHelperApp-CreatePr.
+2. Run the tool to create PR - use predefined run profiles in *launchsettings.json* - GitHelperApp-CreatePr.
     - Review the results.
     - Use ResultFull-5e73c87609894dc49194dbb6643f68b6.md (sample file name, each file have unique GUID identifier) or another file for PRs list.
-    - Open in text editor the file and copy all the content and create the page in Confluence under release section and insert the data from file - it will automatically parse the Markdown and format properly with styles.
-    - Update release notes page - add the link to the results page and upload the files with results.
 
 ## Links
 
