@@ -23,4 +23,6 @@ public interface IOutputService
 
     void OutputRepositoriesResults(List<RepositoryModel> repositoryModels,
         string runId, string directory, bool isPrintToConsole, bool isPrintToFile);
+
+    void OutputBuildDetailsResult(List<BuildDetails> buildResults, string runId, string directory, bool isPrintToConsole, bool isPrintToFile);
 }

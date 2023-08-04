@@ -97,6 +97,34 @@
       "environmentVariables": {
         "GHA_ENVIRONMENT": "Local"
       }
+    },
+    "GitHelperApp-RunPipeline-DryRun": {
+      "commandName": "Project",
+      "commandLineArgs": "run-pipelines -pf true -b dev -e Test -d true",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DD"
+      }
+    },
+    "GitHelperApp-GetBuilds-Dev-Test": {
+      "commandName": "Project",
+      "commandLineArgs": "get-builds -pf true -b dev -e Test",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-GetBuilds-Release-Staging": {
+      "commandName": "Project",
+      "commandLineArgs": "get-builds -pf true -b release -e Staging",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
+    },
+    "GitHelperApp-GetBuilds-Release-Prod": {
+      "commandName": "Project",
+      "commandLineArgs": "get-builds -pf true -b release -e Production",
+      "environmentVariables": {
+        "GHA_ENVIRONMENT": "DR"
+      }
     }
   }
 }

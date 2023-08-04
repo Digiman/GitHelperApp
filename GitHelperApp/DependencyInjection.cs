@@ -35,6 +35,8 @@ public static class DependencyInjection
         services.AddSingleton<IWorkItemsService, WorkItemsService>();
         services.AddTransient<IRepositoryService, RepositoryService>();
 
+        services.AddSingleton<IPipelineService, PipelineService>();
+        
         // add content generators
         services.AddSingleton<IContentGeneratorFactory, ContentGeneratorFactory>();
 
