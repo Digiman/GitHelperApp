@@ -44,6 +44,7 @@ internal static class Program
     /// <summary>
     /// Create and configure host with settings and other things.
     /// </summary>
+    /// <param name="appLocation">Location to set as the application location.</param>
     /// <returns>Returns configured host builder to build and run.</returns>
     private static IHostBuilder CreateHostBuilder(string appLocation) =>
         new HostBuilder()

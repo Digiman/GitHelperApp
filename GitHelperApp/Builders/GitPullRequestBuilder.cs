@@ -13,8 +13,7 @@ public sealed class GitPullRequestBuilder
 {
     private readonly GitPullRequest _pullRequest;
 
-    public GitPullRequestBuilder(string title, string description,
-        string sourceBranch, string destinationBranch)
+    public GitPullRequestBuilder(string title, string description, string sourceBranch, string destinationBranch)
     {
         _pullRequest = new GitPullRequest
         {
@@ -44,10 +43,7 @@ public sealed class GitPullRequestBuilder
     {
         var userNames = new[]
         {
-            "Hydrogen", "Oxygen", // teams
-            "Haygood, Justin", "Brian Bober", // Matrix team members
-            "Ivan Grishkov", "Oleg Solonko", "Konstantin Bondarenko", "Stas Ivanousky", // Oxagile team
-            "Adan Jauregui" // other teams
+            "Hydrogen", "Oxygen"
         };
         _pullRequest.Reviewers = userNames.Select(x => new IdentityRefWithVote
         {
@@ -59,7 +55,7 @@ public sealed class GitPullRequestBuilder
 
     public GitPullRequestBuilder WthDefaultReviewersForMain()
     {
-        var userNames = new[] { "Admiral", "Haygood, Justin", "Brian Bober" };
+        var userNames = new[] { "Admiral" };
         _pullRequest.Reviewers = userNames.Select(x => new IdentityRefWithVote
         {
             Id = Constants.Users[x]

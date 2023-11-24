@@ -156,7 +156,7 @@ Results:
 
 ### 2 Compare on Azure DevOps
 
-Process all the repositories from the configuration file and search for changes between branches. In he configuration we can provide the name for bot branches to compare -source and destination.
+Process all the repositories from the configuration file and search for changes between branches. In the configuration we can provide the name for bot branches to compare -source and destination.
 
 Command arguments:
 

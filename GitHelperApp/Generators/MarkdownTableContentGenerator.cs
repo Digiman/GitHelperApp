@@ -165,18 +165,6 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
         return lines;
     }
 
-    private IEnumerable<string> CreateRepositoriesTable(List<RepositoryModel> repositoryModels)
-    {
-        return repositoryModels
-            .OrderBy(x => x.Name)
-            .Select((x, index) => new
-            {
-                Index = index + 1,
-                Title = $"[{x.Name}]({x.RemoteUrl})",
-            })
-            .ToMarkdownTable(new[] { "#", "Title" });
-    }
-
     #region Helpers.
 
     private static IEnumerable<string> CreatePullRequestList(List<PullRequestResult> prResults)
@@ -243,5 +231,17 @@ public sealed class MarkdownTableContentGenerator : BaseContentGenerator, IConte
             .ToMarkdownTable(new[] { "#", "Repository", "Build Pipeline", "PR", "Work Items Count" });
     }
 
+    private static IEnumerable<string> CreateRepositoriesTable(List<RepositoryModel> repositoryModels)
+    {
+        return repositoryModels
+            .OrderBy(x => x.Name)
+            .Select((x, index) => new
+            {
+                Index = index + 1,
+                Title = $"[{x.Name}]({x.RemoteUrl})",
+            })
+            .ToMarkdownTable(new[] { "#", "Title" });
+    }
+    
     #endregion
 }
